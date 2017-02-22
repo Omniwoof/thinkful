@@ -1,0 +1,46 @@
+<h2>USER LIST</h2>
+<div class="text" *ngFor="let user of users | async">
+  {{user.username}} | {{user.$key}}</div><br>
+  Add ClientID: <input type="text" #newClient placeholder="Title" value="newClient"/><br>
+  Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
+  <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
+<br>
+
+<h2>List existing polls</h2>
+  <div class="text" *ngFor="let poll of polls | async;  let i = index">
+    Poll: {{i+1}} <button (click)="delete(poll.$key)">X</button>
+    <ul>
+  <li>title: {{poll.title}} </li>
+  <li>pollID: {{poll.$key}}</li>
+  <li>ownerID: {{ poll.ownerID }}</li>
+  <li>clientID: {{ poll.clientID }}</li>
+  <li>ownerName: {{ poll.ownerName }}</li>
+  <li>type: {{ poll.type}}</li>
+  <li>prompt: {{ poll.prompt}}</li>
+  <li>label: {{ poll.label}}</li>
+  <li>pagesource: {{ poll.pagesource }}</li>
+  <li>css: {{ poll.css}}</li>
+</ul>
+</div>
+
+<h2>Make New Poll</h2>
+Title: <input type="text" #newTitle placeholder="Title" value="Title"/><br>
+ClientID: <input type="text" #newClientID placeholder="ClientID" value=" -KbUjWVKXghaF6QtkCXh" /><br>
+Type: <input type="text" #newType placeholder="Type" value="Type"/><br>
+Prompt: <input type="text" #newPrompt placeholder="Prompt" value="Prompt"/><br>
+Label 1: <input type="text" #newLabel1 placeholder="Label 1" value="Label 1"/><br>
+Label 2: <input type="text" #newLabel2 placeholder="Label 2" value="Label 2"/><br>
+PageSource: <input type="text" #newPageSource placeholder="PageSource" value="PageSource"/><br>
+CSS: <input type="text" #newCSS placeholder="CSS" value="CSS"/><br>
+<br>
+<button (click)="newPoll(
+                  newTitle.value,
+                  newClientID.value,
+                  newType.value,
+                  newPrompt.value,
+                  newLabel1.value,
+                  newLabel2.value,
+                  newPageSource.value,
+                  newCSS.value
+                  )">Make New Poll</button>
+<br>

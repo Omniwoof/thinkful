@@ -1,0 +1,12 @@
+<h2>
+  You have been Invited to join Thinkful.
+</h2>
+<button (click)="auth.signInWithGoogle()">Accept Invitation</button>
+<div>TEST</div>
+<div class="text" *ngFor="let client of clients | async;  let i = index">
+Clients: {{i+1}}: {{client.$key}}
+</div>
+
+<div class="text" *ngFor="let counsellor of counsellors | async;  let i = index">
+Counsellors: {{i+1}}: {{counsellor.$key}}
+</div>

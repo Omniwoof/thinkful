@@ -1,0 +1,57 @@
+<p>
+  makepoll works!
+</p>
+<div>
+<div style="float:left; width: 200px; height:500px; background: lightblue;">
+  ELEMENT PICKER
+  <ul>
+    <li (click)="addYN()">Yes/No</li>
+    <li (click)="addSlider()">Slider</li>
+    <li (click)="addMulti()">MulitChoice</li>
+  </ul>
+</div>
+<div style="float:left; width: 900px; height:500px; background: lightgreen;">
+  USERS:
+  <select class="form-control" [(ngModel)]="pollForm.clientID" name="clientID" >
+    <option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}</option>
+  </select><br>
+  <form [formGroup]="pollForm">
+    <label>Title:</label>
+      <input type="text" formControlName="title" [(ngModel)]="pollForm.title"><br>
+    <label>clientID:</label>
+      <input type="text" formControlName="clientID" [(ngModel)]="pollForm.clientID"><br>
+    <label>Button Label:</label>
+      <input type="text" formControlName="buttonLabel" [(ngModel)]="pollForm.buttonLabel"><br>
+    <fieldset [formGroup]="sliderForm" *ngIf="slider">
+      <label>Slider Maximum Value:</label>
+        <input type="text" formControlName="maxSlider"><br>
+      <label>Left Label:</label>
+        <input type="text" formControlName="label1"><br>
+      <label>Right Label:</label>
+        <input type="text" formControlName="label2"><br>
+      <br>
+    </fieldset>
+    <fieldset [formGroup]="multiForm" *ngIf="multi">
+      <div formArrayName="choices">
+        <div *ngFor="let choice of multiForm.controls.choices.controls; let i=index">
+          <div>
+            <span> Choice: {{ i +1 }}</span>
+            <span *ngIf="multiForm.controls.choices.length > 1" (click)="removeChoice(i)">
+            </span>
+          </div>
+          <div [formGroupName]="i">
+            <input type="text" formControlName="choice">
+          </div>
+        </div>
+        <button (click)="addChoice()">+</button>
+      </div>
+    </fieldset>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+<div style="float:left; width: 200px; height:500px; background: lightblue;">
+DISPLAY RESULT
+<h2>{{pollForm.title}}</h2>
+<button *ngIf="pollForm.buttonLabel">{{pollForm.buttonLabel}}</button>
+</div>
+</div>

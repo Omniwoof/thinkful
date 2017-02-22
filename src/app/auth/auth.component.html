@@ -1,0 +1,4 @@
+Auth-Status Component
+
+<div *ngIf="auth | async">You are logged in</div>
+<div *ngIf="!(auth | async)">LOGGED OUT</div>
