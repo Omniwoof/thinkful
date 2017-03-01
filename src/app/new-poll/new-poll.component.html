@@ -14,7 +14,9 @@
         </div>
         <label>
           <span>Client ID</span>
-          <input type="text" placeholder="Your Client's ID Number" formControlName="clientID">
+          <select formControlName="clientID" >
+            <option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}</option>
+          </select><br>
         </label>
         <div class="error" *ngIf="poll.get('clientID').touched && poll.get('clientID').hasError('required')">
           ClientID is required
@@ -86,5 +88,5 @@
         <button (click)="clearPoll()">Reset</button>
       </div>
       </form>
-
+<pre>{{poll.value | json}}</pre>
 </div>

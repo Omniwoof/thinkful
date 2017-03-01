@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
 import { Poll } from './poll.interface';
 
+
 @Component({
   selector: 'app-new-poll',
   templateUrl: './new-poll.component.html',
@@ -10,6 +11,7 @@ import { Poll } from './poll.interface';
 })
 export class NewPollComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
+  users: FirebaseListObservable<any[]>;
   poll: FormGroup
   slide: boolean;
   multichoice: boolean;
@@ -17,7 +19,7 @@ export class NewPollComponent implements OnInit {
 
   ngOnInit() {
     this.slide = false;
-    this.initPolls()
+    this.initUsers();
     this.poll = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
     clientID: ['', Validators.required],
@@ -43,9 +45,10 @@ console.log(this.poll)
     const polls = this.af.database.list('/polls');
     // Beware: This is a bit of a cludge.
     // The validation is necessary but without it the control.push() functions
-    // in addChoice() and addSlider() were pushing teh form to the database. The
+    // in addChoice() and addSlider() were pushing the form to the database. The
     // validation stops this from happening but only because the fields in those
     //  forms are not populated with valid values by default.
+    // this.poll.reset() also seems to be submitting the form.
     if (valid){
       polls.push(value);
       this.clearPoll()
@@ -56,6 +59,7 @@ console.log(this.poll)
   }
   clearPoll(){
     this.poll.reset();
+    this.poll.get('button').setValue('Submit')
     this.removeAllChoices();
     this.removeAllSliders();
   }
@@ -64,8 +68,8 @@ console.log(this.poll)
     this.addSlider()
     this.slide = true;
   }
-  initPolls(){
-
+  initUsers(){
+    this.users = this.af.database.list('/users');
   }
   initChoice(){
     return this.fb.group({
