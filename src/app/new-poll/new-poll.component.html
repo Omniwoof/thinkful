@@ -1,6 +1,6 @@
 <div>
-  <button (click)=showSlider() [disabled]="slide">Show Slider</button>
-  <button (click)=showChoice() [disabled]="multichoice">Show Multi</button>
+  <button (click)=showSlider() [disabled]="slide">Add Slider</button>
+  <button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
   <form novalidate (ngSubmit)="onSubmit(poll)" [formGroup]="poll">
         <label>
           <span>Poll Title</span>
@@ -24,7 +24,7 @@
           <input type="text" placeholder="Text for the submit button" formControlName="button">
         </label>
         <div formGroupName="sliders" *ngIf='slide'>
-          <div formArrayName="slider">
+          <div formArrayName="slider"><button (click)="removeAllSliders()">Remove All Sliders</button>
             <div *ngFor="let slider of poll.controls.sliders.controls.slider.controls; let i=index">
               <div>
                 <span> Slider: {{ i +1 }}</span>
@@ -55,7 +55,7 @@
             </div>
           </div>
         </div>
-        <div formGroupName="multi" *ngIf="multichoice">
+        <div formGroupName="multi" *ngIf="multichoice"><button (click)="removeAllChoices()">Remove All Choices</button>
           <label>
             <span>Question</span>
             <input type="text" placeholder="Multiple Choice Question" formControlName="question">
@@ -81,7 +81,10 @@
             </div>
           </div>
         </div>
-        <button type="submit" [disabled]="poll.invalid">Sign up</button>
+        <div>
+        <button type="submit" [disabled]="poll.invalid">Create Poll</button>
+        <button (click)="clearPoll()">Reset</button>
+      </div>
       </form>
 
 </div>

@@ -9,7 +9,8 @@
 <h2>List existing polls</h2>
   <div class="text" *ngFor="let poll of polls | async;  let i = index">
     Poll: {{i+1}} <button (click)="delete(poll.$key)">X</button>
-    <ul>
+    {{poll.title}}
+    <!-- <ul>
   <li>title: {{poll.title}} </li>
   <li>pollID: {{poll.$key}}</li>
   <li>ownerID: {{ poll.ownerID }}</li>
@@ -20,7 +21,7 @@
   <li>label: {{ poll.label}}</li>
   <li>pagesource: {{ poll.pagesource }}</li>
   <li>css: {{ poll.css}}</li>
-</ul>
+</ul> -->
 </div>
 
 <h2>Make New Poll</h2>

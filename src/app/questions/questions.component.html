@@ -7,7 +7,8 @@ USER LIST
 <br>
   <div class="text" *ngFor="let poll of polls | async">
     Poll Template:
-    <ul>
+    {{poll-model}}
+    <!-- <ul>
   <li>title: {{poll.title}} <button (click)="delete(poll.$key)">X</button></li>
   <li>pollID: {{poll.$key}}</li>
   <li>ownerID: {{ poll.ownerID }}</li>
@@ -18,7 +19,7 @@ USER LIST
   <li>label: {{ poll.label}}</li>
   <li>pagesource: {{ poll.pagesource }}</li>
   <li>css: {{ poll.css}}</li>
-</ul>
+</ul> -->
 </div>
 
 <h2>MAKE POLL</h2>
