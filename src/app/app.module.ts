@@ -11,6 +11,7 @@ import { PollComponent } from './poll/poll.component';
 import { InviteComponent } from './invite/invite.component';
 import { MakepollComponent } from './makepoll/makepoll.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { NewPollComponent } from './new-poll/new-poll.component';
 
 // Must export firebase config
 export const firebaseConfig = {
@@ -34,7 +35,8 @@ const appRoutes: Routes = [
     PollComponent,
     InviteComponent,
     InviteComponent,
-    MakepollComponent
+    MakepollComponent,
+    NewPollComponent
   ],
   imports: [
     BrowserModule,

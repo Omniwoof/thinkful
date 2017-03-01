@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
-import { PollModel } from './poll-model'
+import { Poll } from './poll-model'
 @Component({
   selector: 'app-makepoll',
   templateUrl: './makepoll.component.html',
@@ -9,36 +9,42 @@ import { PollModel } from './poll-model'
 })
 export class MakepollComponent implements OnInit {
   users: FirebaseListObservable<any[]>;
+  polls: FirebaseListObservable<any[]>;
   slider;
   yn;
   multi;
   currentUser;
   pollForm: FormGroup;
-  sliderForm: FormGroup;
   ynForm: FormGroup;
   multiForm: FormGroup;
+  sliderForm: FormGroup;
 
-  constructor(private formBuilder: FormBuilder, public af: AngularFire) { }
+  constructor(private fb: FormBuilder, public af: AngularFire) { }
 
   ngOnInit() {
     this.getUsers()
-    this.pollForm = this.formBuilder.group({
+    this.pollForm = this.fb.group({
       title: '',
       clientID: this.currentUser,
-      buttonLabel: ''
+      buttonLabel: '',
+      sliderForm: this.fb.group({
+        maxSlider: '',
+        label1:'',
+        label2:''
+      })
     });
-    this.sliderForm = this.formBuilder.group({
+    this.sliderForm = this.fb.group({
       type: 'Slider',
       maxSlider: '',
       label1: '',
-      label2: '',
+      label2: ''
     });
-    this.ynForm = this.formBuilder.group({
+    this.ynForm = this.fb.group({
       type: 'YN',
     });
-    this.multiForm = this.formBuilder.group({
+    this.multiForm = this.fb.group({
       type: 'Multi',
-      choices: this.formBuilder.array([
+      choices: this.fb.array([
         this.initChoice()
       ])
     })
@@ -65,17 +71,31 @@ export class MakepollComponent implements OnInit {
     this.currentUser = userKey
   }
   addChoice(){
-    console.log('CHOICE ADDED')
+    console.log(this.multiForm.value.choices[0].choice)
     const control = <FormArray>this.multiForm.controls['choices'];
     control.push(this.initChoice());
   }
   initChoice(){
-    return this.formBuilder.group({
+    return this.fb.group({
       choice: ''
     })
   }
   removeChoice(i: number){
     const control = <FormArray>this.multiForm.controls['choices'];
+    control.removeAt(i);
+  }
+  onSubmit( model: Poll ){
+    console.log(model)
+  }
+  initSlider(){
+    return this.fb.group({
+      maxSlider: '',
+      label1: '',
+      label2: ''
+    })
+  }
+  removeSlider(i: number){
+    const control = <FormArray>this.pollForm.controls['sliders'];
     control.removeAt(i);
   }
 }

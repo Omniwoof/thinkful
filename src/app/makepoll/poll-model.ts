@@ -1,8 +1,14 @@
-export class PollModel {
+export interface Poll {
   pollType:string = ""
   title:string = "";
   buttonName:string = "";
-  slider:boolean = false;
+  slider: Slider[];
+
+export interface Slider {
+    maxSlider:string = "";
+    label1:string;
+    label2:string;
+}
 
   constuctor(){
   }

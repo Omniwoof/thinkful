@@ -1,0 +1,87 @@
+<div>
+  <button (click)=showSlider() [disabled]="slide">Show Slider</button>
+  <button (click)=showChoice() [disabled]="multichoice">Show Multi</button>
+  <form novalidate (ngSubmit)="onSubmit(poll)" [formGroup]="poll">
+        <label>
+          <span>Poll Title</span>
+          <input type="text" placeholder="Your poll title" formControlName="title">
+        </label>
+        <div class="error" *ngIf="poll.get('title').touched && poll.get('title').hasError('required')">
+          Name is required
+        </div>
+        <div class="error" *ngIf="poll.get('title').touched && poll.get('title').hasError('minlength')">
+          Minimum of 2 characters
+        </div>
+        <label>
+          <span>Client ID</span>
+          <input type="text" placeholder="Your Client's ID Number" formControlName="clientID">
+        </label>
+        <div class="error" *ngIf="poll.get('clientID').touched && poll.get('clientID').hasError('required')">
+          ClientID is required
+        </div>
+        <label>
+          <span>Button Text</span>
+          <input type="text" placeholder="Text for the submit button" formControlName="button">
+        </label>
+        <div formGroupName="sliders" *ngIf='slide'>
+          <div formArrayName="slider">
+            <div *ngFor="let slider of poll.controls.sliders.controls.slider.controls; let i=index">
+              <div>
+                <span> Slider: {{ i +1 }}</span>
+                <!-- <span *ngIf="poll.controls.sliders.controls.slider.length > 1"> -->
+                  <button (click)="removeSlider(i, poll.controls.sliders.controls.slider.length)">X</button>
+                <!-- </span> -->
+              </div>
+              <div [formGroupName]="i">
+                <label>
+                  <span>Maximum Slider Value</span>
+                  <input type="text" formControlName="max">
+                </label>
+                <div
+                  class="error"
+                  *ngIf="poll.get('sliders').get('slider').at(i).get('max').hasError('required')">
+                  Max Value is required
+                </div>
+                <label>
+                  <span>Left Slider Value</span>
+                <input type="text" formControlName="label1">
+              </label>
+              <label>
+                <span>Right Slider Value</span>
+                <input type="text" formControlName="label2">
+              </label>
+              </div>
+              <button (click)="addSlider()">+</button>
+            </div>
+          </div>
+        </div>
+        <div formGroupName="multi" *ngIf="multichoice">
+          <label>
+            <span>Question</span>
+            <input type="text" placeholder="Multiple Choice Question" formControlName="question">
+          </label>
+          <div
+            class="error"
+            *ngIf="poll.get('multi').get('question').hasError('required') && poll.get('multi').get('question').touched">
+            Question is required
+          </div>
+          <div formArrayName="choices">
+            <div *ngFor="let choice of poll.controls.multi.controls.choices.controls; let i=index">
+              <div>
+                <span> Choice: {{ i +1 }}</span>
+                <!-- <span *ngIf="poll.controls.multi.controls.choices.length > 1"> -->
+                  <button (click)="removeChoice(i, poll.controls.multi.controls.choices.length)">X</button>
+                <!-- </span> -->
+              </div>
+              <div [formGroupName]="i">
+                <input type="text" formControlName="choice">
+
+              </div>
+              <button (click)="addChoice()">+</button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" [disabled]="poll.invalid">Sign up</button>
+      </form>
+
+</div>
