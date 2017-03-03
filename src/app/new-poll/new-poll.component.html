@@ -1,7 +1,7 @@
 <div>
   <button (click)=showSlider() [disabled]="slide">Add Slider</button>
   <button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
-  <form novalidate (ngSubmit)="onSubmit(poll)" [formGroup]="poll">
+  <form [formGroup]="poll">
         <label>
           <span>Poll Title</span>
           <input type="text" placeholder="Your poll title" formControlName="title">
@@ -84,9 +84,15 @@
           </div>
         </div>
         <div>
-        <button type="submit" [disabled]="poll.invalid">Create Poll</button>
+        <button [disabled]="poll.invalid" (click)="onSubmit(poll)">Create Poll</button>
         <button (click)="clearPoll()">Reset</button>
       </div>
       </form>
 <pre>{{poll.value | json}}</pre>
+<div>
+  <h2>{{poll.value.title}}</h2>
+  <ng2-slider min="1", max="10">
+  </ng2-slider>
+  <button>{{poll.value.button}}</button>
+</div>
 </div>
