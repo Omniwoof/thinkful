@@ -94,7 +94,10 @@
       </div>
       </form>
     </md-grid-tile>
-<md-grid-tile [ngStyle]="{'background-image':'url(/assets/images/iphone.png)', 'background-size':'100%', 'background-repeat':'no-repeat'}" >
+<md-grid-tile [ngStyle]="{'background-image':'url(/assets/images/iphone.png)',
+'background-size':'100%',
+'background-repeat':'no-repeat',
+'text-align': 'center'}" >
 
 <div >
   <h2>{{poll.value.title}}</h2>
@@ -105,8 +108,8 @@
 
     </div>
   </div>
-  <div *ngIf="multichoice">
-    {{poll.value.multi.question}}
+  <div *ngIf="multichoice" [ngStyle]="{'text-align': 'left'}">
+    <h3>{{poll.value.multi.question}}</h3>
     <div *ngFor="let choices of poll.value.multi.choices; let i=index">
       <md-checkbox>{{choices.choice}}</md-checkbox>
     </div>

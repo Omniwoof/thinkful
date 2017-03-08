@@ -47,7 +47,7 @@ export class NewPollComponent implements OnInit {
       ])
     }),
     multi: this.fb.group({
-      question: ['Multiple Choice Question', Validators.required],
+      question: ['', ],
       choices: this.fb.array([
         // Don't init on ngOnInit, instead should init on +showChoice() button
         // this.initChoice()
