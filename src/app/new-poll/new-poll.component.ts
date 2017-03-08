@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
 import { Poll } from './poll.interface';
+import { Subject } from 'rxjs/Subject';
 
 
 @Component({
@@ -12,17 +13,32 @@ import { Poll } from './poll.interface';
 export class NewPollComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
   users: FirebaseListObservable<any[]>;
+  clients: FirebaseListObservable<any[]>;
   poll: FormGroup
   slide: boolean;
   multichoice: boolean;
-  constructor(private fb: FormBuilder, public af: AngularFire) { }
+  currentClient: Subject<any>;
+  iphoneImagePath: string;
+
+  constructor(private fb: FormBuilder, public af: AngularFire) {
+
+  this.currentClient = new Subject();
+  this.clients = af.database.list('/users', {
+    query: {
+      orderByKey: true,
+      equalTo: this.currentClient
+    }
+  })
+ }
 
   ngOnInit() {
     this.slide = false;
     this.initUsers();
+    this.iphoneImagePath = 'assets/images/iphone.png'
     this.poll = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
     clientID: ['', Validators.required],
+    clientName: ['', ],
     button: ['Submit', Validators.required],
     sliders: this.fb.group({
       slider: this.fb.array([
@@ -38,7 +54,10 @@ export class NewPollComponent implements OnInit {
       ])
     })
 });
-console.log(this.poll)
+    console.log(this.poll)
+    this.users.subscribe(client => {
+      console.log(client)
+    });
   }
   onSubmit({ value, valid }: { value: Poll, valid: boolean }) {
     console.log(value, valid);
@@ -49,7 +68,9 @@ console.log(this.poll)
     // validation stops this from happening but only because the fields in those
     //  forms are not populated with valid values by default.
     // this.poll.reset() also seems to be submitting the form.
+    // Sort of fixed by moving onSubmit() to the submit button.
     if (valid){
+      //creates additional client information from clientid
       polls.push(value);
       this.clearPoll()
     }
@@ -127,5 +148,14 @@ console.log(this.poll)
     this.slide = false;
     const control = this.poll.controls['sliders']['controls']['slider'];
     while (control.length){control.removeAt(0)};
+  }
+  updateClient(value){
+    this.currentClient.next(value);
+    this.clients.subscribe(client => {
+      this.poll.get('clientName').setValue(client[client.length-1].username) ;
+      console.log(this.poll.value.clientName);
+      console.log(this.poll)
+    })
+    console.log(value)
   }
 }

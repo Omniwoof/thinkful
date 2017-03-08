@@ -12,6 +12,7 @@ import { InviteComponent } from './invite/invite.component';
 import { MakepollComponent } from './makepoll/makepoll.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NewPollComponent } from './new-poll/new-poll.component';
+import { MaterialModule } from '@angular/material';
 
 // Must export firebase config
 export const firebaseConfig = {
@@ -44,7 +45,8 @@ const appRoutes: Routes = [
     HttpModule,
     RouterModule.forRoot(appRoutes),
     AngularFireModule.initializeApp(firebaseConfig),
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MaterialModule
   ],
   providers: [{provide:'authData', useClass: AuthService}],
   bootstrap: [AppComponent]
