@@ -1,8 +1,9 @@
 <md-sidenav-container>
 <md-sidenav mode="side" opened="true" align="right">
 <div>
-  <button (click)=showSlider() [disabled]="slide">Add Slider</button><br>
-  <button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
+  <button md-button (click)=showSlider() [disabled]="slide">Add Slider</button><br>
+  <button md-button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
+
 </div>
 </md-sidenav>
 <md-grid-list cols="4" rowHeight ="800px">
@@ -11,37 +12,48 @@
         <md-input-container>
           <!-- <span>Poll Title</span> -->
           <input mdInput type="text" placeholder="Poll Title" formControlName="title">
-        </md-input-container>
+
         <div class="error" *ngIf="poll.get('title').touched && poll.get('title').hasError('required')">
-          Name is required
+          Poll title is required
         </div>
         <div class="error" *ngIf="poll.get('title').touched && poll.get('title').hasError('minlength')">
           Minimum of 2 characters
         </div>
-        <label>
-          <span>Client ID</span>
-          <select formControlName="clientID" (change)="updateClient($event.target.value)">
-            <option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}
-            </option>
-          </select>
-        </label>
+        </md-input-container>
+        <br><br>
+        <!-- <label> -->
+          <md-select formControlName="clientID" placeholder="Choose Client" (change)="updateClient($event.value)">
+            <!-- updateClient($event.target.value) -->
+            <md-option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}
+            </md-option>
+          </md-select>
+        <!-- </label> -->
         <div class="error" *ngIf="poll.get('clientID').touched && poll.get('clientID').hasError('required')">
           ClientID is required
         </div>
+        <br><br>
         <md-input-container>
           <input mdInput type="text" placeholder="Text for the submit button" formControlName="button">
+        <div class="error" *ngIf="poll.get('button').touched && poll.get('button').hasError('required')">
+          Button Label is required
+        </div>
         </md-input-container>
         <div formGroupName="sliders" *ngIf='slide'>
+          <hr>
           <div formArrayName="slider">
-            <button style="float: right;" (click)="removeAllSliders()">Remove All Sliders</button>
+            <!-- <button md-button style="float: right;" (click)="removeAllSliders()">Remove All Sliders</button> -->
             <div *ngFor="let slider of poll.controls.sliders.controls.slider.controls; let i=index">
               <div>
-                <span> Slider: {{ i +1 }}</span>
-                <!-- <span *ngIf="poll.controls.sliders.controls.slider.length > 1"> -->
-                  <button (click)="removeSlider(i, poll.controls.sliders.controls.slider.length)">X</button>
-                <!-- </span> -->
+
+                <!-- <span> Slider #{{ i +1 }}</span> -->
+                  <button style="float: right;" color="warn" md-icon-button (click)="removeSlider(i, poll.controls.sliders.controls.slider.length)">
+                    <md-icon>clear</md-icon>
+                  </button>
               </div>
               <div [formGroupName]="i">
+                <md-input-container>
+                  <input mdInput type="text" placeholder="Edit Slider #{{ i +1 }} Title" formControlName="slideName">
+                </md-input-container>
                 <md-input-container>
                   <input mdInput type="text" placeholder="Maximum Slider Value" formControlName="max">
                 </md-input-container>
@@ -50,6 +62,7 @@
                   *ngIf="poll.get('sliders').get('slider').at(i).get('max').hasError('required')">
                   Max Value is required
                 </div>
+                <br>
                 <md-input-container>
                 <input mdInput type="text" placeholder="Left Slider Value" formControlName="label1">
               </md-input-container>
@@ -57,14 +70,18 @@
                 <input mdInput type="text" placeholder="Right Slider Value"formControlName="label2">
               </md-input-container>
               </div>
-              <button (click)="addSlider()">+</button>
+
             </div>
+            <button md-icon-button (click)="addSlider()">
+              <md-icon>add_circle</md-icon>
+            </button>
           </div>
         </div>
         <div formGroupName="multi" *ngIf="multichoice">
-          <button style="float: right;" (click)="removeAllChoices()">Remove All Choices</button>
+          <hr>
+          <!-- <button md-button style="float: right;" (click)="removeAllChoices()">Remove All Choices</button> -->
           <md-input-container>
-            <input mdInput type="text" placeholder="Multiple Choice Question" formControlName="question">
+            <input mdInput type="text" placeholder="Multiple Choice Title" formControlName="question">
           </md-input-container>
           <div
             class="error"
@@ -82,15 +99,20 @@
               <div [formGroupName]="i">
                 <md-input-container>
                 <input mdInput type="text" placeholder="Choice #{{ i +1 }}" formControlName="choice">
-                </md-input-container><button (click)="removeChoice(i, poll.controls.multi.controls.choices.length)">X</button>
+                </md-input-container>
+                <button style="float: right;" color="warn" md-icon-button (click)="removeChoice(i, poll.controls.multi.controls.choices.length)">
+                  <md-icon>clear</md-icon>
+                </button>
               </div>
-              <button (click)="addChoice()">+</button>
+
             </div>
+            <button md-icon-button (click)="addChoice()"><md-icon>add_circle</md-icon></button>
           </div>
         </div>
+        <hr>
         <div>
-        <button [disabled]="poll.invalid" (click)="onSubmit(poll)">Create Poll</button>
-        <button (click)="clearPoll()">Reset</button>
+        <button md-icon-button color="primary" [disabled]="poll.invalid" (click)="onSubmit(poll)"><md-icon>done</md-icon></button>
+        <button md-icon-button color="warn" (click)="clearPoll()"><md-icon>delete</md-icon></button>
       </div>
       </form>
     </md-grid-tile>
@@ -103,19 +125,22 @@
   <h2>{{poll.value.title}}</h2>
   <div *ngIf="slide" >
     <div *ngFor="let sli of poll.value.sliders.slider; let i=index">
-
+      <h3>
+        {{sli.slideName}}
+      </h3>
+      {{sli.label1}}
     <md-slider min="1" max="{{sli.max}}" step="1" value="1" tickInterval="1" thumbLabel ></md-slider>
-
+      {{sli.label2}}
     </div>
   </div>
-  <div *ngIf="multichoice" [ngStyle]="{'text-align': 'left'}">
+  <div *ngIf="multichoice">
     <h3>{{poll.value.multi.question}}</h3>
-    <div *ngFor="let choices of poll.value.multi.choices; let i=index">
+    <div *ngFor="let choices of poll.value.multi.choices; let i=index" [ngStyle]="{'text-align': 'left'}">
       <md-checkbox>{{choices.choice}}</md-checkbox>
     </div>
   </div>
   <div *ngIf='poll.value.button'>
-    <button>{{poll.value.button}}</button>
+    <button md-raised-button>{{poll.value.button}}</button>
   </div>
 </div>
 <!-- <div position="relative">

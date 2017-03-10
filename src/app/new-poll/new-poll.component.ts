@@ -54,10 +54,9 @@ export class NewPollComponent implements OnInit {
       ])
     })
 });
-    console.log(this.poll)
-    this.users.subscribe(client => {
-      console.log(client)
-    });
+    // this.users.subscribe(client => {
+    //   console.log(client)
+    // });
   }
   onSubmit({ value, valid }: { value: Poll, valid: boolean }) {
     console.log(value, valid);
@@ -98,9 +97,8 @@ export class NewPollComponent implements OnInit {
     })
   }
   initSlider(){
-    console.log('Slider Init Started')
     return this.fb.group({
-      question: ['', ],
+      slideName: ['', ],
       max: ['5', Validators.required],
       label1: ['', Validators.required],
       label2: ['', Validators.required]
@@ -122,7 +120,7 @@ export class NewPollComponent implements OnInit {
     if (i==0 && length == 1){
       this.multichoice=false;
       const question = this.poll.get('multi').get('question');
-      question.setValue('Multiple Choice Question')
+      question.setValue('')
     };
     const control = this.poll.controls['multi']['controls']['choices'];
     control.removeAt(i);
@@ -130,7 +128,7 @@ export class NewPollComponent implements OnInit {
   removeAllChoices(){
     this.multichoice = false;
     const question = this.poll.get('multi').get('question');
-    question.setValue('Multiple Choice Question')
+    question.setValue('')
     const control = this.poll.controls['multi']['controls']['choices'];
     while (control.length){control.removeAt(0)};
   }
@@ -150,12 +148,17 @@ export class NewPollComponent implements OnInit {
     while (control.length){control.removeAt(0)};
   }
   updateClient(value){
-    this.currentClient.next(value);
+    //broken - doesn't work on first value
+
     this.clients.subscribe(client => {
       this.poll.get('clientName').setValue(client[client.length-1].username) ;
-      console.log(this.poll.value.clientName);
-      console.log(this.poll)
+      // console.log(this.poll.value.clientName);
+      // console.log(this.poll)
     })
+    this.currentClient.next(value);
     console.log(value)
+  }
+  tester(){
+    console.log('TEST WORKED')
   }
 }

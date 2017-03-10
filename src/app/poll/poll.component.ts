@@ -19,6 +19,7 @@ export class PollComponent implements OnInit {
     //subscribe to userdata from auth.service
     this.auth.auth$.subscribe(authState => {
       console.log('AuthState: '+ authState);
+      console.log(authState);
     })
     this.getUsers()
     this.initPolls()

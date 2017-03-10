@@ -1,19 +1,20 @@
-<div style="float:right; width:60%;">
-  <img style="height: 96px;"src="{{ authData?.displayPhoto()}}">
-</div>
-<div> Hello {{ authData?.displayName() }}</div>
-<div> UserID: {{ authData?.displayUID() }}</div>
+<md-toolbar>
+  <h3>
+    {{title}}
+  </h3>
+  <span style="flex: 1 1 auto;"></span>
+  <button (click)="authData.signInWithGoogle()">Login Google</button>
+  <!--<button (click)="authData.signInWithFacebook()">Login Facebook</button>-->
+  <button *ngIf="!(auth | async)" (click)="authData.logout()">Logout</button>
+  <md-toolbar-row>
+<span > Hello {{ authData?.displayName() }} {{ authData?.uid }}</span>
+<span style="flex: 1 1 auto;"></span>
+<img *ngIf="!(auth | async)" style="height: 32px;"src="{{ authData?.displayPhoto()}}">
 
+<!-- <app-auth></app-auth> -->
 
-<app-auth></app-auth>
-
-<button (click)="authData.signInWithGoogle()">Login Google</button>
-<!--<button (click)="authData.signInWithFacebook()">Login Facebook</button>-->
-<button (click)="authData.logout()">Logout</button>
-
-<h1>
-  {{title}}
-</h1>
+</md-toolbar-row>
+</md-toolbar>
 <div style="float:right;"> <app-poll></app-poll></div>
 <div><app-new-poll></app-new-poll><div>
  <!-- <div><app-makepoll></app-makepoll><div> -->
