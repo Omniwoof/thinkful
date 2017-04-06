@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
 import { Poll } from './poll.interface';
 import { Subject } from 'rxjs/Subject';
+import {MdSnackBar} from '@angular/material';
 
 
 @Component({
@@ -20,7 +21,7 @@ export class NewPollComponent implements OnInit {
   currentClient: Subject<any>;
   iphoneImagePath: string;
 
-  constructor(private fb: FormBuilder, public af: AngularFire) {
+  constructor(private fb: FormBuilder, public af: AngularFire, public snackBar: MdSnackBar) {
 
   this.currentClient = new Subject();
   this.clients = af.database.list('/users', {
@@ -71,7 +72,10 @@ export class NewPollComponent implements OnInit {
     if (valid){
       //creates additional client information from clientid
       polls.push(value);
-      this.clearPoll()
+      this.snackBar.open("Saved successfully","" ,{
+        duration: 1000,
+      });
+      this.clearPoll();
     }
     else{
       console.log('pollForm is Invalid')

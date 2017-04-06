@@ -5,43 +5,86 @@
   Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
   <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
 <br>
+<md-grid-list cols="3">
+<md-grid-tile colspan="1">
+<md-list>
+  <md-list-item>
+    <h3>List of Polls</h3>
+  </md-list-item>
+  <md-list-item *ngFor="let poll of polls | async;  let i = index">
+      <button md-button style="width:100%; text-align:left;" (click)="choosePoll(poll.$key)">
+        {{i+1}}: {{poll.title}} | {{poll.$key}}</button>
+      <button md-icon-button color="warn" (click)="delete(poll.$key)">
+        <md-icon md-list-icon>clear</md-icon>
+      </button>
+    </md-list-item>
+</md-list>
+</md-grid-tile>
+<md-grid-tile colspan="1">
 
-<h2>List existing polls</h2>
-  <div class="text" *ngFor="let poll of polls | async;  let i = index">
-    Poll: {{i+1}} <button (click)="delete(poll.$key)">X</button>
-    {{poll.title}}
-    <!-- <ul>
-  <li>title: {{poll.title}} </li>
-  <li>pollID: {{poll.$key}}</li>
-  <li>ownerID: {{ poll.ownerID }}</li>
-  <li>clientID: {{ poll.clientID }}</li>
-  <li>ownerName: {{ poll.ownerName }}</li>
-  <li>type: {{ poll.type}}</li>
-  <li>prompt: {{ poll.prompt}}</li>
-  <li>label: {{ poll.label}}</li>
-  <li>pagesource: {{ poll.pagesource }}</li>
-  <li>css: {{ poll.css}}</li>
-</ul> -->
-</div>
+  <form *ngIf="currentPoll" [formGroup]="result">
 
-<h2>Make New Poll</h2>
-Title: <input type="text" #newTitle placeholder="Title" value="Title"/><br>
-ClientID: <input type="text" #newClientID placeholder="ClientID" value=" -KbUjWVKXghaF6QtkCXh" /><br>
-Type: <input type="text" #newType placeholder="Type" value="Type"/><br>
-Prompt: <input type="text" #newPrompt placeholder="Prompt" value="Prompt"/><br>
-Label 1: <input type="text" #newLabel1 placeholder="Label 1" value="Label 1"/><br>
-Label 2: <input type="text" #newLabel2 placeholder="Label 2" value="Label 2"/><br>
-PageSource: <input type="text" #newPageSource placeholder="PageSource" value="PageSource"/><br>
-CSS: <input type="text" #newCSS placeholder="CSS" value="CSS"/><br>
-<br>
-<button (click)="newPoll(
-                  newTitle.value,
-                  newClientID.value,
-                  newType.value,
-                  newPrompt.value,
-                  newLabel1.value,
-                  newLabel2.value,
-                  newPageSource.value,
-                  newCSS.value
-                  )">Make New Poll</button>
-<br>
+  <div>
+    <h2> {{currentPoll.title}}</h2>
+    <!-- <input type="text" formControlName="title" value="{{currentPoll.title}}">
+    <input type="text" formControlName="clientID" value="{{currentPoll.clientID}}">
+    <input type="text" formControlName="clientName" value="{{currentPoll.clientName}}">
+    <input type="text" formControlName="button" value="{{currentPoll.button}}"> -->
+  </div>
+    <div formGroupName="sliders" *ngIf="result.controls.sliders.controls.slider.controls[0]">
+      <div formArrayName="slider">
+          <div *ngFor="let slider of result.controls.sliders.controls.slider.controls; let i=index">
+            <div [formGroupName]="i">
+              <h3>{{currentPoll.sliders.slider[i].slideName}}</h3>
+              {{currentPoll.sliders.slider[i].label1}}
+            <md-slider min="1" max="{{currentPoll.sliders.slider[i].max}}" step="1" value="1" tickInterval="1" thumbLabel formControlName="sliderVal">
+            </md-slider>
+              {{currentPoll.sliders.slider[i].label2}}
+            <br>
+            <!-- <input type="text" formControlName="label1" value="{{currentPoll.sliders.slider[i].label1}}">
+            <input type="text" formControlName="label2" value="{{currentPoll.sliders.slider[i].label2}}">
+            <input type="text" formControlName="max" value="{{currentPoll.sliders.slider[i].max}}"> -->
+          </div>
+        </div>
+    </div>
+  </div>
+  <div formGroupName="multi" *ngIf="result.controls.multi.controls.choices.controls[0]">
+   <div formArrayName='choices'>
+     <div *ngFor="let choice of result.controls.multi.controls.choices.controls; let i=index">
+       <div [formGroupName]="i">
+         <md-checkbox formControlName="chosen" >
+         {{currentPoll.multi.choices[i].choice}}
+       </md-checkbox>
+       </div>
+     </div>
+   </div>
+  </div>
+    <!-- <div *ngIf="currentPoll.multi.question">
+      <div *ngFor="let choices of currentPoll.multi.choices; let i=index">
+        <md-checkbox>{{choices.choice}}</md-checkbox>
+      </div>
+    </div> -->
+      <button (click)='addResult(result)'>{{currentPoll.button}}</button>
+      <button (click)='viewResult(result)'>View Result</button>
+      <!-- <md-list>
+        <md-list-item *ngFor="let item of result;  let i = index">
+          #{{i}}: {{item}}
+          </md-list-item>
+      </md-list> -->
+
+  </form>
+</md-grid-tile>
+<md-grid-tile colspan="1">
+  <md-list>
+  <md-list-item>
+     <h3>Display Data</h3>
+   </md-list-item>
+  <md-list-item *ngFor="let result of results | async;  let i = index">
+    {{result.title}} | {{result.pollID}}
+    <button md-icon-button color="warn" (click)="deleteResult(result.$key)">
+      <md-icon>clear</md-icon>
+    </button>
+  </md-list-item>
+</md-list>
+</md-grid-tile>
+</md-grid-list>

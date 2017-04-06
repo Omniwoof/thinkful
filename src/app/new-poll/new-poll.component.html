@@ -1,12 +1,18 @@
-<md-sidenav-container>
-<md-sidenav mode="side" opened="true" align="right">
-<div>
-  <button md-button (click)=showSlider() [disabled]="slide">Add Slider</button><br>
-  <button md-button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
+<!-- <div><md-sidenav-container> -->
+<!-- <md-sidenav mode="side" opened="true" align="right"> -->
 
-</div>
-</md-sidenav>
-<md-grid-list cols="4" rowHeight ="800px">
+<!-- </md-sidenav> -->
+<md-grid-list cols="5" rowHeight ="800px">
+<md-grid-tile colspan="1">
+  <md-list>
+    <md-list-item>
+      <button md-button (click)=showSlider() [disabled]="slide">Add Slider</button><br>
+    </md-list-item>
+    <md-list-item>
+      <button md-button (click)=showChoice() [disabled]="multichoice">Add Multiple Choice</button>
+    </md-list-item>
+  </md-list>
+</md-grid-tile>
 <md-grid-tile colspan="3">
   <form [formGroup]="poll">
         <md-input-container>
@@ -151,4 +157,4 @@
   <pre>{{poll.value | json}}</pre>
 </md-grid-tile>
 </md-grid-list>
-</md-sidenav-container>
+<!-- </md-sidenav-container> -->
