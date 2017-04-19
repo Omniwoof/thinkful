@@ -1,3 +1,4 @@
+
 <h2>USER LIST</h2>
 <div class="text" *ngFor="let user of users | async">
   {{user.username}} | {{user.$key}}</div><br>
@@ -73,18 +74,31 @@
       </md-list> -->
 
   </form>
+
+  <div *ngIf="currentPoll">
+    <div id="chart_div"></div>
+    {{data | json}}
+    <google-chart [data]="lineChartOptions"></google-chart>
+
+  </div>
 </md-grid-tile>
 <md-grid-tile colspan="1">
+
+
   <md-list>
   <md-list-item>
      <h3>Display Data</h3>
    </md-list-item>
+   <!-- <md-list-item>
+     <google-chart [data]="lineChartOptions"></google-chart>
+   </md-list-item> -->
   <md-list-item *ngFor="let result of results | async;  let i = index">
     {{result.title}} | {{result.pollID}}
     <button md-icon-button color="warn" (click)="deleteResult(result.$key)">
       <md-icon>clear</md-icon>
     </button>
   </md-list-item>
+
 </md-list>
 </md-grid-tile>
 </md-grid-list>

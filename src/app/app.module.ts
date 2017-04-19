@@ -13,6 +13,9 @@ import { MakepollComponent } from './makepoll/makepoll.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NewPollComponent } from './new-poll/new-poll.component';
 import { MaterialModule } from '@angular/material';
+import { Ng2GoogleChartsModule } from 'ng2-google-charts';
+import { ChartDirective } from './chart.directive';
+import { ChartComponent } from './chart/chart.component';
 
 // Must export firebase config
 export const firebaseConfig = {
@@ -37,7 +40,9 @@ const appRoutes: Routes = [
     InviteComponent,
     InviteComponent,
     MakepollComponent,
-    NewPollComponent
+    NewPollComponent,
+    ChartDirective,
+    ChartComponent
   ],
   imports: [
     BrowserModule,
@@ -46,7 +51,8 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes),
     AngularFireModule.initializeApp(firebaseConfig),
     ReactiveFormsModule,
-    MaterialModule
+    MaterialModule,
+    Ng2GoogleChartsModule
   ],
   providers: [{provide:'authData', useClass: AuthService}],
   bootstrap: [AppComponent]

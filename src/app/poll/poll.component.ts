@@ -4,6 +4,7 @@ import { AuthService } from '../auth.service';
 import {Observable, Subject, BehaviorSubject} from "rxjs/Rx";
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import * as firebase from 'firebase';
+declare var google:any;
 
 @Component({
   selector: 'app-poll',
@@ -15,9 +16,15 @@ export class PollComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
   results: FirebaseListObservable<any[]>;
   currentPoll;
+  currentResults;
   result: FormGroup;
   auth;
   currentTime;
+  lineChartOptions;
+  lineControlOptions;
+  data2 = [ [ "2017-04-05T11:52:59.918Z", 1 ], [ "2017-04-05T11:53:00.635Z", 1 ], [ "2017-04-05T11:53:01.179Z", 1 ], [ "2017-04-05T11:53:01.776Z", 1 ], [ "2017-04-05T11:53:03.743Z", 1 ], [ "2017-04-05T12:45:42.582Z", 1 ], [ "2017-04-05T12:45:48.164Z", 1 ], [ "2017-04-05T12:45:51.467Z", 1 ], [ "2017-04-05T12:48:41.928Z", 1 ], [ "2017-04-05T12:48:46.698Z", 1 ], [ "2017-04-10T04:58:56.290Z", 1 ], [ "2017-04-11T06:21:39.479Z", 1 ] ]
+  dataTable;
+  currentChart;
 
   constructor(private fb: FormBuilder,
     public af: AngularFire,
@@ -32,6 +39,8 @@ export class PollComponent implements OnInit {
     this.getUsers()
     this.initPolls()
     this.initResults()
+    // this.drawChart()
+    // this.altChart()
   }
   delete(key) {
     this.polls.remove(key)
@@ -56,14 +65,43 @@ export class PollComponent implements OnInit {
     })
   }
   choosePoll(key){
-    this.generateDateTime();
+    this.altChart()
+    //this.generateDateTime();
     console.log('KEY: ', key)
     this.af.database.object('/polls/' + key).subscribe(poll => {
-      console.log("Current Poll");
       this.currentPoll = poll;
-      console.log(this.currentPoll);
-      console.log("Current Poll Title: ", this.currentPoll.title);
+      console.log('CURRENT POLL: ', this.currentPoll);
+      console.log('CURRENT POLL KEY: ', this.currentPoll.$key);
     })
+    this.currentResults = this.af.database.list('/results/', {
+      query: {
+        orderByChild: 'pollID',
+        equalTo: this.currentPoll.$key
+      }
+    })
+    console.log('CURRENT RESULTS: ', this.currentResults)
+      // console.log('Created: ', data[0].created)
+      // this.dataTable.push([new Date(data.created), 1])
+    this.currentResults.subscribe(data2 => {
+      console.log('DATA SUB: ', data2)
+      this.data2 = data2.map(value => [new Date(value.created), 1])
+      console.log('DATA MAP: ', this.data2)
+      //this.data.unshift([Date, 'Count'])
+      // this.initChart()
+      this.altChart()
+      //this.drawChart()
+    })
+    console.log('DATATABLE: ', this.data2)
+    // if (this.data) {
+    //   this.data.unshift([Date, 'Count'])
+    //   console.log('YES DATA')
+    //   console.log('DATATABLE: ', this.data)
+    //   this.initChart()
+    // }
+    // else{
+    //   console.log('NO DATA')
+    //   console.log('DATATABLE: ', this.data)
+    // }
     this.result = this.fb.group({
     pollID: [this.currentPoll.$key, ],
     title: [this.currentPoll.title, [Validators.required, Validators.minLength(2)]],
@@ -169,4 +207,57 @@ export class PollComponent implements OnInit {
     this.currentTime = firebase.database.ServerValue.TIMESTAMP;
     console.log('Time: ', this.currentTime)
   }
+  drawChart() {
+    let data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Counts');
+        data.addRows([ [ "2017-04-05T11:52:59.918Z", 1 ], [ "2017-04-05T11:53:00.635Z", 1 ], [ "2017-04-05T11:53:01.179Z", 1 ], [ "2017-04-05T11:53:01.776Z", 1 ], [ "2017-04-05T11:53:03.743Z", 1 ], [ "2017-04-05T12:45:42.582Z", 1 ], [ "2017-04-05T12:45:48.164Z", 1 ], [ "2017-04-05T12:45:51.467Z", 1 ], [ "2017-04-05T12:48:41.928Z", 1 ], [ "2017-04-05T12:48:46.698Z", 1 ], [ "2017-04-10T04:58:56.290Z", 1 ], [ "2017-04-11T06:21:39.479Z", 1 ] ]);
+        // data.addRows(this.data2)
+    let options = {'title':'How Much Pizza I Ate Last Night',
+                       'width':500,
+                       'height':300};
+   let chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+       chart.draw(data, options);
+  }
+  altChart(){
+    this.genData()
+    // google.charts.load('current', {'packages':['corechart']});
+    // google.charts.setOnLoadCallback(drawChart);
+    google.charts.load('current',
+     { packages: ['corechart'], callback: this.drawChart });
+    // function drawChart() {
+    //   let newData = this.data
+    //   console.log('NewData: ', newData)
+    //   var data = new google.visualization.DataTable();
+    //       data.addColumn('string', 'Topping');
+    //       data.addColumn('number', 'Slices');
+    //       data.addRows([
+    //         ['Mushrooms', 3],
+    //         ['Onions', 1],
+    //         ['Olives', 1],
+    //         ['Zucchini', 1],
+    //         ['Pepperoni', 2]
+    //       ]);
+    //   var options = {'title':'How Much Pizza I Ate Last Night',
+    //                      'width':500,
+    //                      'height':300};
+    //  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+    //      chart.draw(data, options);
+    // }
+  }
+  genData(){
+    console.log('GenData: ', this.data2)
+    return this.data2
+  }
+  // initChart(){
+  // this.lineChartOptions =  {
+  //   chartType: 'LineChart',
+  //   dataTable: this.data,
+  //   options: {'title': 'Counter',
+  //   vAxis: {
+  //           title: 'Number of Counts'
+  //         }
+  //     },
+  //   };
+  // }
 }
