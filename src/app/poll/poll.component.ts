@@ -4,7 +4,10 @@ import { AuthService } from '../auth.service';
 import {Observable, Subject, BehaviorSubject} from "rxjs/Rx";
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import * as firebase from 'firebase';
+import { ChartReadyEvent } from 'ng2-google-charts';
 declare var google:any;
+
+
 
 @Component({
   selector: 'app-poll',
@@ -20,16 +23,75 @@ export class PollComponent implements OnInit {
   result: FormGroup;
   auth;
   currentTime;
-  lineChartOptions;
-  lineControlOptions;
-  data2 = [ [ "2017-04-05T11:52:59.918Z", 1 ], [ "2017-04-05T11:53:00.635Z", 1 ], [ "2017-04-05T11:53:01.179Z", 1 ], [ "2017-04-05T11:53:01.776Z", 1 ], [ "2017-04-05T11:53:03.743Z", 1 ], [ "2017-04-05T12:45:42.582Z", 1 ], [ "2017-04-05T12:45:48.164Z", 1 ], [ "2017-04-05T12:45:51.467Z", 1 ], [ "2017-04-05T12:48:41.928Z", 1 ], [ "2017-04-05T12:48:46.698Z", 1 ], [ "2017-04-10T04:58:56.290Z", 1 ], [ "2017-04-11T06:21:39.479Z", 1 ] ]
-  dataTable;
-  currentChart;
+  data:any;
+  emptyData: any;
+  // rawData =  [
+  //       [new Date(1491393179918), 25],
+  //       [new Date(1491393180635), 26],
+  //       [new Date(1491393181179), 27],
+  //       [new Date(1491393181776), 27],
+  //       [new Date(1491393183743), 29],
+  //       [new Date(1491396342582), 29],
+  //       [new Date(1491396351467), 35],
+  //       [new Date(1491396526698), 36],
+  //       [new Date(1491800079971), 34],
+  //       [new Date(1491800085958), 32],
+  //       [new Date(1494306732122), 31]
+  //     ]
+  public lineChartOptions:any =  {
+    chartType: 'AnnotationChart',
+
+    dataTable: [],
+    options: {
+      // title: 'Client Feedback',
+      displayAnnotations: true,
+      pointsVisible: true,
+      pointSize: 20,
+      zoomEndTime: new Date(1494994428768),
+      // zoomStartTime: None,
+      // curveType: 'function',
+      // colors: ['#a52714'],
+      // hAxis: {
+      //    title: 'Time',
+      //    format:'MMM d, y',
+      //    textStyle: {
+      //       color: '#01579b',
+      //       fontSize: 20,
+      //       fontName: 'Arial',
+      //       bold: true,
+      //       italic: true
+      //    },
+      //    titleTextStyle: {
+      //       color: '#01579b',
+      //       fontSize: 16,
+      //       fontName: 'Arial',
+      //       bold: false,
+      //       italic: true
+      //    }
+      // },
+      // vAxis: {
+      //    title: 'Counts',
+      //    textStyle: {
+      //       color: '#1a237e',
+      //       fontSize: 24,
+      //       bold: true
+      //    },
+      //    titleTextStyle: {
+      //       color: '#1a237e',
+      //       fontSize: 24,
+      //       bold: true
+      //    }
+      // }
+    }
+  };
+
 
   constructor(private fb: FormBuilder,
     public af: AngularFire,
     @Inject('authData') auth) { this.auth = auth; }
 
+    public ready(event: ChartReadyEvent) {
+    }
   ngOnInit() {
     //subscribe to userdata from auth.service
     this.auth.auth$.subscribe(authState => {
@@ -39,6 +101,9 @@ export class PollComponent implements OnInit {
     this.getUsers()
     this.initPolls()
     this.initResults()
+    console.log("Chart Options: ", this.lineChartOptions)
+    // this.initChart()
+
     // this.drawChart()
     // this.altChart()
   }
@@ -65,8 +130,9 @@ export class PollComponent implements OnInit {
     })
   }
   choosePoll(key){
-    this.altChart()
-    //this.generateDateTime();
+    //this.initChart()
+    // Generates Server Based Date/Time Stamp
+    this.generateDateTime();
     console.log('KEY: ', key)
     this.af.database.object('/polls/' + key).subscribe(poll => {
       this.currentPoll = poll;
@@ -80,28 +146,70 @@ export class PollComponent implements OnInit {
       }
     })
     console.log('CURRENT RESULTS: ', this.currentResults)
-      // console.log('Created: ', data[0].created)
-      // this.dataTable.push([new Date(data.created), 1])
-    this.currentResults.subscribe(data2 => {
-      console.log('DATA SUB: ', data2)
-      this.data2 = data2.map(value => [new Date(value.created), 1])
-      console.log('DATA MAP: ', this.data2)
-      //this.data.unshift([Date, 'Count'])
-      // this.initChart()
-      this.altChart()
-      //this.drawChart()
+    // this.lineChartOptions.options.title = this.result.value.title
+    console.log('CHART TITLE: ', this.lineChartOptions.options.title)
+    this.currentResults.subscribe(data => {
+      this.data=[]
+      console.log('DATA SUB: ', data)
+      //If slider or multi, map data differently
+      //TODO: Add test if there is no data
+      if (data[0].sliders != null && data[0].multi.choices != null){
+        data.forEach(value => {
+          var newData= []
+          newData.push(new Date(value.created))
+          value.sliders.slider.forEach(slider => {
+            newData.push(slider.sliderVal)
+          })
+          value.multi.choices.forEach(multi => {
+            //Places true/false values on the same scale as the slider
+            newData.push(Number(multi.chosen*data[0].sliders.slider[0].max))
+          })
+          this.data.push(newData)
+        })
+        this.combinedData()
+      }
+      else if (data[0].sliders){
+        data.forEach(value => {
+          var newData = []
+          newData.push(new Date(value.created))
+          value.sliders.slider.forEach(slider => {
+            newData.push(slider.sliderVal)
+          })
+          this.data.push(newData)
+        })
+        this.sliderData()
+        // this.data = data.map(value => [new Date(value.created),
+        //   value.sliders.slider[0].sliderVal])
+        //       console.log('DATA MAP: ', this.data)
+        //       this.sliderData()
+        // console.log('GENSLIDER')
+      }
+      else if (data[0].multi.question){
+        //GenMulti Data
+        data.forEach(value => {
+          var newData = []
+          newData.push(new Date(value.created))
+          value.multi.choices.forEach(choice => {
+            newData.push(Number(choice.chosen))
+          })
+          this.data.push(newData)
+        })
+        this.multiData()
+
+        // this.data = data.map((value, index) => [new Date(value.created),
+        //   Number(value.multi.choices[0].chosen),
+        //   Number(value.multi.choices[1].chosen),
+        //   Number(value.multi.choices[2].chosen)])
+        //       console.log('DATA MAP: ', this.data)
+        //       this.multiData()
+        // console.log('GENMULTI')
+      }else {this.data = data.map(value => [new Date(value.created), 1])
+            console.log('DATA MAP: ', this.data)
+            this.genData()
+          }
+
     })
-    console.log('DATATABLE: ', this.data2)
-    // if (this.data) {
-    //   this.data.unshift([Date, 'Count'])
-    //   console.log('YES DATA')
-    //   console.log('DATATABLE: ', this.data)
-    //   this.initChart()
-    // }
-    // else{
-    //   console.log('NO DATA')
-    //   console.log('DATATABLE: ', this.data)
-    // }
+    console.log('DATATABLE: ', this.data)
     this.result = this.fb.group({
     pollID: [this.currentPoll.$key, ],
     title: [this.currentPoll.title, [Validators.required, Validators.minLength(2)]],
@@ -112,7 +220,6 @@ export class PollComponent implements OnInit {
     sliders: this.fb.group({
       slider: this.fb.array([
         //initSlider() initalized with showSlider()
-        //this.initSlider()
       ])
     }),
     multi: this.fb.group({
@@ -133,8 +240,6 @@ export class PollComponent implements OnInit {
         this.initSlider(-1);
         this.addSlider(i);
       }
-  //this.initSlider();
-  //this.addSlider();
     }
     if(this.currentPoll.multi.choices){
       for (var i=0; i < this.currentPoll.multi.choices.length; i++){
@@ -176,16 +281,6 @@ export class PollComponent implements OnInit {
       })
     }
   }
-  // initSlider(){
-  //   console.log('Init Slider')
-  //   return this.fb.group({
-  //     slideName: ['', ],
-  //     sliderVal: ['', ],
-  //     label1: ['', ],
-  //     label2: ['', ],
-  //     max: ['', ]
-  //   })
-  // }
   addSlider(i){
     console.log('Slider Added')
     console.log('RESULT: ', this.result)
@@ -207,57 +302,164 @@ export class PollComponent implements OnInit {
     this.currentTime = firebase.database.ServerValue.TIMESTAMP;
     console.log('Time: ', this.currentTime)
   }
-  drawChart() {
-    let data = new google.visualization.DataTable();
-        data.addColumn('string', 'Topping');
-        data.addColumn('number', 'Counts');
-        data.addRows([ [ "2017-04-05T11:52:59.918Z", 1 ], [ "2017-04-05T11:53:00.635Z", 1 ], [ "2017-04-05T11:53:01.179Z", 1 ], [ "2017-04-05T11:53:01.776Z", 1 ], [ "2017-04-05T11:53:03.743Z", 1 ], [ "2017-04-05T12:45:42.582Z", 1 ], [ "2017-04-05T12:45:48.164Z", 1 ], [ "2017-04-05T12:45:51.467Z", 1 ], [ "2017-04-05T12:48:41.928Z", 1 ], [ "2017-04-05T12:48:46.698Z", 1 ], [ "2017-04-10T04:58:56.290Z", 1 ], [ "2017-04-11T06:21:39.479Z", 1 ] ]);
-        // data.addRows(this.data2)
-    let options = {'title':'How Much Pizza I Ate Last Night',
-                       'width':500,
-                       'height':300};
-   let chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-       chart.draw(data, options);
-  }
-  altChart(){
-    this.genData()
-    // google.charts.load('current', {'packages':['corechart']});
-    // google.charts.setOnLoadCallback(drawChart);
-    google.charts.load('current',
-     { packages: ['corechart'], callback: this.drawChart });
-    // function drawChart() {
-    //   let newData = this.data
-    //   console.log('NewData: ', newData)
-    //   var data = new google.visualization.DataTable();
-    //       data.addColumn('string', 'Topping');
-    //       data.addColumn('number', 'Slices');
-    //       data.addRows([
-    //         ['Mushrooms', 3],
-    //         ['Onions', 1],
-    //         ['Olives', 1],
-    //         ['Zucchini', 1],
-    //         ['Pepperoni', 2]
-    //       ]);
-    //   var options = {'title':'How Much Pizza I Ate Last Night',
-    //                      'width':500,
-    //                      'height':300};
-    //  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
-    //      chart.draw(data, options);
-    // }
+  floorDate(datetime) {
+    var newDate = new Date(datetime);
+    newDate.setHours(0);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0)
+    return newDate;
   }
   genData(){
-    console.log('GenData: ', this.data2)
-    return this.data2
+      let dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('date', 'Time');
+            dataTable.addColumn('number', 'Count');
+            console.log('DATA ARRAY', this.data)
+            dataTable.addRows(this.data);
+              // function floorDate(datetime) {
+              //   var newDate = new Date(datetime);
+              //   newDate.setHours(0);
+              //   newDate.setMinutes(0);
+              //   newDate.setSeconds(0);
+              //   newDate.setMilliseconds(0)
+              //   return newDate;
+              // }
+              var newData = google.visualization.data.group(dataTable, [{
+                column: 0,
+                modifier: this.floorDate,
+                //aggregation: google.visualization.data.sum,
+                type: 'date'
+            }], [{
+                column: 1,
+                label: 'Counts',
+                aggregation: google.visualization.data.sum,
+                type: 'number'
+            }]);
+            console.log('DataTable: ', dataTable)
+            console.log('NewDataTable: ', newData)
+            //Re-initalizes the chart
+    this.lineChartOptions = Object.create(this.lineChartOptions);
+    this.lineChartOptions.dataTable = newData
   }
-  // initChart(){
-  // this.lineChartOptions =  {
-  //   chartType: 'LineChart',
-  //   dataTable: this.data,
-  //   options: {'title': 'Counter',
-  //   vAxis: {
-  //           title: 'Number of Counts'
-  //         }
-  //     },
-  //   };
-  // }
+  sliderData(){
+    let dataTable = new google.visualization.DataTable();
+          var yData = []
+          dataTable.addColumn('date', 'Time');
+          this.result.value.sliders.slider.forEach((element, index) => {
+            dataTable.addColumn('number', element.slideName)
+            yData.push({
+              column: index+1,
+              label: element.slideName,
+              aggregation: google.visualization.data.sum,
+              type: 'number'
+            })
+          })
+
+          // dataTable.addColumn('number', 'Value');
+          dataTable.addRows(this.data);
+          this.lineChartOptions = Object.create(this.lineChartOptions);
+          this.lineChartOptions.dataTable = dataTable
+  }
+  multiData(){
+    let dataTable = new google.visualization.DataTable();
+    var yData = []
+          dataTable.addColumn('date', 'Time');
+          this.result.value.multi.choices.forEach((element, index) => {
+            console.log('ForEach Choice #'+index+":", element.choice.choice)
+            dataTable.addColumn('number', element.choice.choice)
+            yData.push({column: index+1,
+              label: element.choice.choice,
+              aggregation: google.visualization.data.sum,
+              type: 'number'})
+          })
+          // console.log('Col1: ',this.result.value.multi.choices[0].choice.choice)
+          // console.log('Col2: ',this.result.value.multi.choices[1].choice.choice)
+          // dataTable.addColumn('number', this.result.value.multi.choices[0].choice.choice);
+          // dataTable.addColumn('number', this.result.value.multi.choices[1].choice.choice);
+          // console.log('CurrentData: ',this.data)
+          dataTable.addRows(this.data);
+          // console.log('CurrentDataTable: ', dataTable)
+          // function floorDate(datetime) {
+          //   var newDate = new Date(datetime);
+          //   newDate.setHours(0);
+          //   newDate.setMinutes(0);
+          //   newDate.setSeconds(0);
+          //   newDate.setMilliseconds(0)
+          //   return newDate;
+          // }
+
+
+          // var yData = this.result.value.multi.choices.map((element, index) => {
+          //   return {column: index+1,
+          //     label: element.choice.choice,
+          //     aggregation: google.visualization.data.sum,
+          //     type: 'number'}
+          // })
+          // var yData = [{
+          //     column: 1,
+          //     label: this.result.value.multi.choices[0].choice.choice,
+          //     aggregation: google.visualization.data.sum,
+          //     type: 'number'
+          // },
+          // {
+          //     column: 2,
+          //     label: this.result.value.multi.choices[1].choice.choice,
+          //     aggregation: google.visualization.data.sum,
+          //     type: 'number'
+          // }]
+          console.log('yData: ', yData)
+          var newData = google.visualization.data.group(dataTable, [{
+            column: 0,
+            modifier: this.floorDate,
+            type: 'date'
+        }], yData
+      );
+          console.log('NEWDATA: ', newData )
+          this.lineChartOptions = Object.create(this.lineChartOptions);
+          this.lineChartOptions.dataTable = newData
+  }
+  combinedData(){
+    console.log('combinedData: ', this.data)
+    let dataTable = new google.visualization.DataTable();
+    console.log('this.result.value.sliders.slider.length: ',this.result.value.sliders.slider.length)
+    var yData = []
+          dataTable.addColumn('date', 'Time');
+          this.result.value.sliders.slider.forEach((element, index) => {
+            console.log('ForEach Slider #'+index+":", element.slideName)
+            dataTable.addColumn('number', element.slideName)
+            yData.push({
+              column: index+1,
+              label: element.slideName,
+              aggregation: google.visualization.data.sum,
+              type: 'number'
+            })
+          })
+          this.result.value.multi.choices.forEach((element, index) => {
+            console.log('ForEach Choice #'+index+this.result.value.sliders.slider.length+":", element.choice.choice)
+            dataTable.addColumn('number', element.choice.choice)
+            yData.push({column: index+1+this.result.value.sliders.slider.length,
+              label: element.choice.choice,
+              aggregation: google.visualization.data.sum,
+              type: 'number'})
+          })
+          console.log('yData: ', yData)
+          dataTable.addRows(this.data);
+          // function floorDate(datetime) {
+          //   var newDate = new Date(datetime);
+          //   newDate.setHours(0);
+          //   newDate.setMinutes(0);
+          //   newDate.setSeconds(0);
+          //   newDate.setMilliseconds(0)
+          //   return newDate;
+          // }
+          var newData = google.visualization.data.group(dataTable, [{
+            column: 0,
+            modifier: this.floorDate,
+            type: 'date'
+        }], yData
+      );
+          console.log('NEWDATA: ', newData )
+          this.lineChartOptions = Object.create(this.lineChartOptions);
+          this.lineChartOptions.dataTable = newData
+  }
 }

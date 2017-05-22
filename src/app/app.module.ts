@@ -40,9 +40,9 @@ const appRoutes: Routes = [
     InviteComponent,
     InviteComponent,
     MakepollComponent,
-    NewPollComponent,
-    ChartDirective,
-    ChartComponent
+    NewPollComponent
+    // ChartDirective,
+    // ChartComponent
   ],
   imports: [
     BrowserModule,

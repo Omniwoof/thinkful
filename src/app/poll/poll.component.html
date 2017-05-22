@@ -6,6 +6,7 @@
   Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
   <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
 <br>
+<google-chart [data]="lineChartOptions" (chartReady)='ready($event)'></google-chart>
 <md-grid-list cols="3">
 <md-grid-tile colspan="1">
 <md-list>
@@ -76,9 +77,9 @@
   </form>
 
   <div *ngIf="currentPoll">
-    <div id="chart_div"></div>
-    {{data | json}}
-    <google-chart [data]="lineChartOptions"></google-chart>
+    <!-- <div id="chart_div"></div>
+    {{lineChartOptions.dataTable | json}}
+    <google-chart [data]="lineChartOptions"></google-chart> -->
 
   </div>
 </md-grid-tile>
