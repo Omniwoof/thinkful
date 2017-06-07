@@ -6,8 +6,15 @@
   Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
   <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
 <br>
-<google-chart [data]="lineChartOptions" (chartReady)='ready($event)'></google-chart>
+
 <md-grid-list cols="3">
+  <md-grid-tile [colspan]="3">
+    <!-- <md-list>
+      <md-list-item [colspan]=3> -->
+        <google-chart [data]="lineChartOptions" (chartReady)='ready($event)'></google-chart>
+      <!-- </md-list-item>
+    </md-list> -->
+  </md-grid-tile>
 <md-grid-tile colspan="1">
 <md-list>
   <md-list-item>

@@ -6,6 +6,8 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import * as firebase from 'firebase';
 import { ChartReadyEvent } from 'ng2-google-charts';
 declare var google:any;
+declare var wrapper:any;
+var aggregate:string;
 
 
 
@@ -44,6 +46,7 @@ export class PollComponent implements OnInit {
     dataTable: [],
     options: {
       // title: 'Client Feedback',
+      width: 800,
       displayAnnotations: true,
       pointsVisible: true,
       pointSize: 20,
@@ -130,6 +133,7 @@ export class PollComponent implements OnInit {
     })
   }
   choosePoll(key){
+    aggregate = 'daily';
     //this.initChart()
     // Generates Server Based Date/Time Stamp
     this.generateDateTime();
@@ -208,6 +212,7 @@ export class PollComponent implements OnInit {
             this.genData()
           }
 
+          // initRangeChangeDetection()
     })
     console.log('DATATABLE: ', this.data)
     this.result = this.fb.group({
@@ -303,11 +308,15 @@ export class PollComponent implements OnInit {
     console.log('Time: ', this.currentTime)
   }
   floorDate(datetime) {
+    console.log('Aggregate =', aggregate)
+    console.log('FloorDate datetime: ', datetime)
     var newDate = new Date(datetime);
+    if (aggregate = 'daily'){
     newDate.setHours(0);
     newDate.setMinutes(0);
     newDate.setSeconds(0);
     newDate.setMilliseconds(0)
+  }
     return newDate;
   }
   genData(){
@@ -461,5 +470,12 @@ export class PollComponent implements OnInit {
           console.log('NEWDATA: ', newData )
           this.lineChartOptions = Object.create(this.lineChartOptions);
           this.lineChartOptions.dataTable = newData
+          google.visualization.events.addListener(wrapper, 'rangechange', this.rangechange_handler);
+  }
+  // initRangeChangeDetection(){
+  //   google.visualization.events.addListener(this.lineChartOptions, 'rangechange', this.rangechange_handler);
+  // }
+  rangechange_handler(e){
+    console.log('Range changed to ', e['start'], ' and ', e['end']);
   }
 }
