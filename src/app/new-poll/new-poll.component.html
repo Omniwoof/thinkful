@@ -2,7 +2,8 @@
 <!-- <md-sidenav mode="side" opened="true" align="right"> -->
 
 <!-- </md-sidenav> -->
-<md-grid-list cols="5" rowHeight ="800px">
+<!-- TODO Bit hacky to do user auth here, probably best to move to to router -->
+<md-grid-list *ngIf="(user | async)?.displayName" cols="5" rowHeight ="800px">
 <md-grid-tile colspan="1">
   <md-list>
     <md-list-item>
@@ -18,7 +19,6 @@
         <md-input-container>
           <!-- <span>Poll Title</span> -->
           <input mdInput type="text" placeholder="Poll Title" formControlName="title">
-
         <div class="error" *ngIf="poll.get('title').touched && poll.get('title').hasError('required')">
           Poll title is required
         </div>

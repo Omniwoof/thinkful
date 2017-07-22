@@ -1,6 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AngularFire, AuthProviders, FirebaseAuthState, AngularFireAuth, AuthMethods, FirebaseListObservable } from 'angularfire2';
-
+// import { AngularFire, AuthProviders, FirebaseAuthState, AngularFireAuth, AuthMethods, FirebaseListObservable } from 'angularfire2';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabaseModule, AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-invite',
@@ -8,37 +10,52 @@ import { AngularFire, AuthProviders, FirebaseAuthState, AngularFireAuth, AuthMet
   styleUrls: ['./invite.component.css']
 })
 export class InviteComponent implements OnInit {
-  private authState: FirebaseAuthState;
+  private authState: Observable<firebase.User>;
   id: number;
   private sub: any;
   clients: FirebaseListObservable<any[]>;
   counsellors: FirebaseListObservable<any[]>;
   auth;
 
-  constructor( @Inject('authData') auth, private af: AngularFire) {
+  constructor( @Inject('authData') auth,
+  private afAuth: AngularFireAuth,
+  public db: AngularFireDatabase
+) {
     this.auth = auth;
-  }
-
-  ngOnInit() {
-    this.getClients();
-    this.getCounsellors();
-  }
-  getClients(){
-    this.clients = this.af.database.list('/clients',{
+    this.clients = db.list('/clients',{
       query: {
         orderByChild: 'counsellor',
         equalTo: this.auth.displayUID()
       }
     });
-  }
-  getCounsellors(){
-    console.log('DUSPLAY ID: ', this.auth.UID)
-    this.counsellors = this.af.database.list('/clients',{
+    this.counsellors = db.list('/clients',{
       query: {
         orderByChild: 'client',
         equalTo: this.auth.displayUID()
       }
     });
   }
+
+  ngOnInit() {
+    // this.getClients();
+    // this.getCounsellors();
+  }
+  // getClients(){
+  //   this.clients = db.list('/clients',{
+  //     query: {
+  //       orderByChild: 'counsellor',
+  //       equalTo: this.auth.displayUID()
+  //     }
+  //   });
+  // }
+  // getCounsellors(){
+  //   console.log('DUSPLAY ID: ', this.auth.UID)
+  //   this.counsellors = db.list('/clients',{
+  //     query: {
+  //       orderByChild: 'client',
+  //       equalTo: this.auth.displayUID()
+  //     }
+  //   });
+  // }
 
 }

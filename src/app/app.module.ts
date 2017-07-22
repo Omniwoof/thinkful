@@ -1,12 +1,14 @@
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
-import { AngularFireModule, AuthProviders, AuthMethods } from 'angularfire2';
+import { AngularFireModule } from 'angularfire2';
+import { AngularFireDatabaseModule } from 'angularfire2/database';
+import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AuthService } from './auth.service';
-import { AuthComponent } from './auth/auth.component';
 import { PollComponent } from './poll/poll.component';
 import { InviteComponent } from './invite/invite.component';
 import { MakepollComponent } from './makepoll/makepoll.component';
@@ -14,8 +16,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NewPollComponent } from './new-poll/new-poll.component';
 import { MaterialModule } from '@angular/material';
 import { Ng2GoogleChartsModule } from 'ng2-google-charts';
-import { ChartDirective } from './chart.directive';
-import { ChartComponent } from './chart/chart.component';
+import * as firebase from 'firebase'
 
 // Must export firebase config
 export const firebaseConfig = {
@@ -28,33 +29,34 @@ export const firebaseConfig = {
 
 const appRoutes: Routes = [
 
-  { path: 'invite/:id', component: InviteComponent }
+  { path: 'invite/:id', component: InviteComponent },
+  { path: 'newquestion', component: NewPollComponent }
 ];
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    AuthComponent,
     PollComponent,
-    InviteComponent,
     InviteComponent,
     MakepollComponent,
     NewPollComponent
-    // ChartDirective,
-    // ChartComponent
   ],
   imports: [
+    BrowserAnimationsModule,
     BrowserModule,
     FormsModule,
     HttpModule,
     RouterModule.forRoot(appRoutes),
     AngularFireModule.initializeApp(firebaseConfig),
+    AngularFireDatabaseModule,
+    AngularFireAuthModule,
     ReactiveFormsModule,
     MaterialModule,
     Ng2GoogleChartsModule
   ],
-  providers: [{provide:'authData', useClass: AuthService}],
+  // TODO: Probably should register auth.service here.
+  // providers: [{provide:'authData', useClass: AuthService}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

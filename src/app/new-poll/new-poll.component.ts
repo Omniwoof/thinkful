@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
+import { FirebaseListObservable, AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireAuth } from 'angularfire2/auth'
 import { Poll } from './poll.interface';
 import { Subject } from 'rxjs/Subject';
 import {MdSnackBar} from '@angular/material';
+import { Observable } from 'rxjs/Observable';
 
 
 @Component({
@@ -14,6 +16,7 @@ import {MdSnackBar} from '@angular/material';
 export class NewPollComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
   users: FirebaseListObservable<any[]>;
+  user: Observable<firebase.User>;
   clients: FirebaseListObservable<any[]>;
   poll: FormGroup
   slide: boolean;
@@ -21,10 +24,16 @@ export class NewPollComponent implements OnInit {
   currentClient: Subject<any>;
   iphoneImagePath: string;
 
-  constructor(private fb: FormBuilder, public af: AngularFire, public snackBar: MdSnackBar) {
-
+  constructor(private fb: FormBuilder,
+    public afAuth: AngularFireAuth,
+    public snackBar: MdSnackBar,
+    public db: AngularFireDatabase
+  ) {
+  this.polls = db.list('/polls');
   this.currentClient = new Subject();
-  this.clients = af.database.list('/users', {
+  this.users = db.list('/users');
+  this.user = afAuth.authState;
+  this.clients = db.list('/users', {
     query: {
       orderByKey: true,
       equalTo: this.currentClient
@@ -33,8 +42,9 @@ export class NewPollComponent implements OnInit {
  }
 
   ngOnInit() {
+    console.log('Clients: ', this.users)
     this.slide = false;
-    this.initUsers();
+    // this.initUsers();
     this.iphoneImagePath = 'assets/images/iphone.png'
     this.poll = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(2)]],
@@ -61,7 +71,7 @@ export class NewPollComponent implements OnInit {
   }
   onSubmit({ value, valid }: { value: Poll, valid: boolean }) {
     console.log(value, valid);
-    const polls = this.af.database.list('/polls');
+    // const polls = db.list('/polls');
     // Beware: This is a bit of a cludge.
     // The validation is necessary but without it the control.push() functions
     // in addChoice() and addSlider() were pushing the form to the database. The
@@ -71,7 +81,7 @@ export class NewPollComponent implements OnInit {
     // Sort of fixed by moving onSubmit() to the submit button.
     if (valid){
       //creates additional client information from clientid
-      polls.push(value);
+      this.polls.push(value);
       this.snackBar.open("Saved successfully","" ,{
         duration: 1000,
       });
@@ -92,9 +102,9 @@ export class NewPollComponent implements OnInit {
     this.addSlider()
     this.slide = true;
   }
-  initUsers(){
-    this.users = this.af.database.list('/users');
-  }
+  // initUsers(){
+  //   this.users = this.af.database.list('/users');
+  // }
   initChoice(){
     return this.fb.group({
       choice: ['', Validators.required]

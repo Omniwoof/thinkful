@@ -1,10 +1,13 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
+import { AngularFireModule} from 'angularfire2';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { AngularFireAuthModule, AngularFireAuth } from 'angularfire2/auth';
 import { AuthService } from '../auth.service';
 import {Observable, Subject, BehaviorSubject} from "rxjs/Rx";
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import * as firebase from 'firebase';
 import { ChartReadyEvent } from 'ng2-google-charts';
+import { Router } from '@angular/router';
 declare var google:any;
 declare var wrapper:any;
 var aggregate:string;
@@ -17,13 +20,15 @@ var aggregate:string;
   styleUrls: ['./poll.component.css']
 })
 export class PollComponent implements OnInit {
+  user: Observable<firebase.User>;
   users: FirebaseListObservable<any[]>;
   polls: FirebaseListObservable<any[]>;
   results: FirebaseListObservable<any[]>;
   currentPoll;
   currentResults;
+  currentUser;
   result: FormGroup;
-  auth;
+  // auth;
   currentTime;
   data:any;
   emptyData: any;
@@ -49,61 +54,41 @@ export class PollComponent implements OnInit {
       width: 800,
       displayAnnotations: true,
       pointsVisible: true,
-      pointSize: 20,
-      zoomEndTime: new Date(1494994428768),
-      // zoomStartTime: None,
-      // curveType: 'function',
-      // colors: ['#a52714'],
-      // hAxis: {
-      //    title: 'Time',
-      //    format:'MMM d, y',
-      //    textStyle: {
-      //       color: '#01579b',
-      //       fontSize: 20,
-      //       fontName: 'Arial',
-      //       bold: true,
-      //       italic: true
-      //    },
-      //    titleTextStyle: {
-      //       color: '#01579b',
-      //       fontSize: 16,
-      //       fontName: 'Arial',
-      //       bold: false,
-      //       italic: true
-      //    }
-      // },
-      // vAxis: {
-      //    title: 'Counts',
-      //    textStyle: {
-      //       color: '#1a237e',
-      //       fontSize: 24,
-      //       bold: true
-      //    },
-      //    titleTextStyle: {
-      //       color: '#1a237e',
-      //       fontSize: 24,
-      //       bold: true
-      //    }
-      // }
+      pointSize: 20
+      //zoomEndTime: new Date(1494994428768)
     }
   };
 
 
   constructor(private fb: FormBuilder,
-    public af: AngularFire,
-    @Inject('authData') auth) { this.auth = auth; }
+    public afAuth: AngularFireAuth,
+    public db: AngularFireDatabase,
+    public authService: AuthService
+    // @Inject('authData') auth
+  )
+    {
+      this.currentUser = authService.getUser();
+      this.user = afAuth.authState;
+      // this.auth = auth;
+      this.users = db.list('/users');
+      this.polls = db.list('/polls');
+      this.results = db.list('/results');
+     }
 
     public ready(event: ChartReadyEvent) {
     }
   ngOnInit() {
     //subscribe to userdata from auth.service
-    this.auth.auth$.subscribe(authState => {
-      console.log('AuthState: '+ authState);
-      console.log(authState);
-    })
-    this.getUsers()
-    this.initPolls()
-    this.initResults()
+    // this.auth.auth$.subscribe(authState => {
+    //   console.log('AuthState: '+ authState);
+    //   console.log(authState);
+    // })
+
+    // this.auth = this.user
+
+    // this.getUsers()
+    // this.initPolls()
+    // this.initResults()
     console.log("Chart Options: ", this.lineChartOptions)
     // this.initChart()
 
@@ -116,34 +101,33 @@ export class PollComponent implements OnInit {
   deleteResult(key){
     this.results.remove(key)
   }
-
-  getUsers(){
-    this.users = this.af.database.list('/users');
-  }
-  initPolls(){
-    this.polls = this.af.database.list('/polls');
-  }
-  initResults(){
-    this.results = this.af.database.list('/results');
-  }
-  addUserData(clientID, pollOwned){
-    this.users.update(this.auth.displayUID(),{
-      clientID: clientID,
-      qowned: pollOwned
-    })
-  }
+  // getUsers(){
+  //   this.users = db.list('/users');
+  // }
+  // initPolls(){
+  //   this.polls = db.list('/polls');
+  // }
+  // initResults(){
+  //   this.results = db.list('/results');
+  // }
+  // addUserData(clientID, pollOwned){
+  //   this.users.update(this.user.displayName(),{
+  //     clientID: clientID,
+  //     qowned: pollOwned
+  //   })
+  // }
   choosePoll(key){
     aggregate = 'daily';
     //this.initChart()
     // Generates Server Based Date/Time Stamp
     this.generateDateTime();
     console.log('KEY: ', key)
-    this.af.database.object('/polls/' + key).subscribe(poll => {
+    this.db.object('/polls/' + key).subscribe(poll => {
       this.currentPoll = poll;
       console.log('CURRENT POLL: ', this.currentPoll);
       console.log('CURRENT POLL KEY: ', this.currentPoll.$key);
     })
-    this.currentResults = this.af.database.list('/results/', {
+    this.currentResults = this.db.list('/results/', {
       query: {
         orderByChild: 'pollID',
         equalTo: this.currentPoll.$key
@@ -470,7 +454,7 @@ export class PollComponent implements OnInit {
           console.log('NEWDATA: ', newData )
           this.lineChartOptions = Object.create(this.lineChartOptions);
           this.lineChartOptions.dataTable = newData
-          google.visualization.events.addListener(wrapper, 'rangechange', this.rangechange_handler);
+          // google.visualization.events.addListener(wrapper, 'rangechange', this.rangechange_handler);
   }
   // initRangeChangeDetection(){
   //   google.visualization.events.addListener(this.lineChartOptions, 'rangechange', this.rangechange_handler);

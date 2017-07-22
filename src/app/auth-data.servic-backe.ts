@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AngularFire, AuthProviders } from 'angularfire2';
+// import { AuthProviders } from 'angularfire2';
+import { AngularFireAuth } from 'angularfire2/auth';
 // import firebase probably not needed
-//import * as firebase from 'firebase';
+import * as firebase from 'firebase';
 
 // Creates a list of variables for user data
 // Each variable needs to be defined here because authData.uid works but
@@ -19,22 +20,27 @@ export class AuthDataService {
   uid:string
   photoURL:string
 
-  constructor(public af: AngularFire) {
-    this.af.auth.subscribe(auth => {
-      console.log(auth),
-      this.uid = auth.uid,
-      this.userdata = auth,
-      this.displayName = auth.auth.displayName,
-      this.photoURL = auth.auth.photoURL
-    });
+  constructor(public afAuth: AngularFireAuth) {
+    // afAuth.subscribe(auth => {
+    //   console.log(auth),
+    //   this.uid = auth.uid,
+    //   this.userdata = auth,
+    //   this.displayName = auth.auth.displayName,
+    //   this.photoURL = auth.auth.photoURL
+    // });
     console.log("TEST USERDATA: ")
     console.log(this.userdata)
   }
+  ngOnInit() {
+    console.log('Data Service Loaded')
+  }
   login() {
-   this.af.auth.login();
+    this.afAuth.auth.signOut().then(() => {
+      console.log('LOGGED OUT')
+ });
  }
 
  logout() {
-    this.af.auth.logout();
+    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
  }
 }

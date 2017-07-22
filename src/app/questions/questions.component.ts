@@ -1,13 +1,15 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
+// import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabase, FirebaseListObservable } from "angularfire2/database";
 import { Subject } from 'rxjs/Subject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import { AuthService } from '../auth.service';
+import * as firebase from 'firebase/app';
 
 @Component({
   selector: 'app-questions',
   templateUrl: './questions.component.html',
-  styleUrls: ['./questions.component.css']
+  styleUrls: ['./questions.component.css'],
 })
 export class QuestionsComponent implements OnInit {
   questions: FirebaseListObservable<any[]>;
@@ -15,9 +17,20 @@ export class QuestionsComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
   auth;
 
-  constructor(public af: AngularFire, @Inject('authData') auth ) {
+  constructor(
+    // public afAuth: AngularFireAuth,
+    public db: AngularFireDatabase,
+    @Inject('authData') auth ) {
     //this.questions = af.database.list('/questions')
     this.auth = auth;
+    this.questions = db.list('/questions',{
+//        query: {
+//          orderByChild: 'ownerID',
+//          equalTo: ''
+//        }
+    });
+    this.users = db.list('/users');
+    this.polls = db.list('/polls');
    }
 
   ngOnInit() {
@@ -25,9 +38,9 @@ export class QuestionsComponent implements OnInit {
     this.auth.auth$.subscribe(authState => {
       console.log('AuthState: '+ authState);
     })
-    this.initQuestions()
-    this.getUsers()
-    this.initPolls()
+    // this.initQuestions()
+    // this.getUsers()
+    // this.initPolls()
   }
     newPoll(title, client ,type, prompt, label1, label2, pagesource, css) {
       var label;
@@ -46,21 +59,21 @@ export class QuestionsComponent implements OnInit {
     delete(key) {
       this.polls.remove(key)
     }
-    initQuestions(){
-      this.questions = this.af.database.list('/questions',{
-//        query: {
-//          orderByChild: 'ownerID',
-//          equalTo: ''
-//        }
-      });
-    }
-    getUsers(){
-      this.users = this.af.database.list('/users');
-      console.log('GET USERS')
-    }
-    initPolls(){
-      this.polls = this.af.database.list('/polls');
-    }
+//     initQuestions(){
+//       this.questions = this.af.database.list('/questions',{
+// //        query: {
+// //          orderByChild: 'ownerID',
+// //          equalTo: ''
+// //        }
+//       });
+//     }
+    // getUsers(){
+    //   this.users = this.af.database.list('/users');
+    //   console.log('GET USERS')
+    // }
+    // initPolls(){
+    //   this.polls = this.af.database.list('/polls');
+    // }
     addUserData(clientID, questOwned){
       this.users.update(this.auth.displayUID(),{
         clientID: clientID,

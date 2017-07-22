@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AngularFire, FirebaseListObservable, AngularFireAuth } from 'angularfire2';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { Poll } from './poll-model'
 @Component({
   selector: 'app-makepoll',
@@ -19,10 +20,13 @@ export class MakepollComponent implements OnInit {
   multiForm: FormGroup;
   sliderForm: FormGroup;
 
-  constructor(private fb: FormBuilder, public af: AngularFire) { }
+  constructor(private fb: FormBuilder,
+    public afAuth: AngularFireAuth,
+    public db: AngularFireDatabase
+  ) { this.users = db.list('/users');}
 
   ngOnInit() {
-    this.getUsers()
+    // this.getUsers()
     this.pollForm = this.fb.group({
       title: '',
       clientID: this.currentUser,
@@ -64,9 +68,9 @@ export class MakepollComponent implements OnInit {
     this.yn=false;
     this.multi=true;
   }
-  getUsers(){
-    this.users = this.af.database.list('/users');
-  }
+  // getUsers(){
+  //   return this.users
+  // }
   selectedUser(userKey){
     this.currentUser = userKey
   }

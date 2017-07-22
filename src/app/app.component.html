@@ -3,18 +3,31 @@
     {{title}}
   </h3>
   <span style="flex: 1 1 auto;"></span>
-  <button (click)="authData.signInWithGoogle()">Login Google</button>
-  <!--<button (click)="authData.signInWithFacebook()">Login Facebook</button>-->
-  <button *ngIf="!(auth | async)" (click)="authData.logout()">Logout</button>
-  <md-toolbar-row>
-<span > Hello {{ authData?.displayName() }} {{ authData?.uid }}</span>
-<span style="flex: 1 1 auto;"></span>
-<img *ngIf="!(auth | async)" style="height: 32px;"src="{{ authData?.displayPhoto()}}">
+  <button *ngIf="(user | async)?.displayName" md-button [md-menu-trigger-for]="menu">
 
-<!-- <app-auth></app-auth> -->
 
-</md-toolbar-row>
+
+  <!-- <span style="flex: 1 1 auto;"></span> -->
+  <!-- <img *ngIf="!(auth | async)" style="height: 32px;"src="{{ authData?.displayPhoto()}}"> -->
+<md-list>
+<md-list-item>
+  <img md-list-avatar src="{{ (user | async)?.photoURL }}">
+  <h3 md-line>{{ (user | async)?.displayName }}</h3>
+</md-list-item>
+</md-list>
+</button>
+<md-menu #menu="mdMenu">
+  <!-- TODO: Configure Settings and Invite components -->
+  <button md-menu-item>Settings</button>
+  <button md-menu-item>Invite Client</button>
+  <button md-menu-item (click)="authService.logout()">Sign Out</button>
+</md-menu>
+  <button md-button *ngIf="!(user | async)?.displayName" (click)="authService.login()">Login Google</button>
+  <!-- <button *ngIf="(user | async)?.displayName" (click)="authService.logout()">Logout</button> -->
+<!-- <md-toolbar-row>
+  <app-poll></app-poll>
+</md-toolbar-row> -->
 </md-toolbar>
-<app-poll></app-poll>
-<app-new-poll></app-new-poll>
+<app-poll *ngIf="(user | async)?.displayName"></app-poll>
+<!-- <app-new-poll></app-new-poll> -->
 <router-outlet></router-outlet>

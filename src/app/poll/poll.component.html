@@ -1,4 +1,4 @@
-
+<div *ngIf="showTesting">
 <h2>USER LIST</h2>
 <div class="text" *ngFor="let user of users | async">
   {{user.username}} | {{user.$key}}</div><br>
@@ -6,29 +6,57 @@
   Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
   <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
 <br>
+</div>
 
 <md-grid-list cols="3">
-  <md-grid-tile [colspan]="3">
+  <!-- <md-toolbar> -->
+    <span>
+  <!-- <md-grid-tile colspan="1"> -->
+    <!-- <md-list-item> -->
+
+    <!-- </md-list-item> -->
+    <button md-icon-button><a href="#"><md-icon>home</md-icon></a></button>
+    <button md-icon-button><a href="/newquestion"><md-icon>add_circle</md-icon></a></button>
+    <button md-icon-button [mdMenuTriggerFor]="pollList">List Questions
+    <md-icon>more_vert</md-icon>
+  </button>
+  <md-menu #pollList="mdMenu">
+  <md-list>
+
+    <md-list-item *ngFor="let poll of polls | async;  let i = index">
+        <button md-button style="width:100%; text-align:left;" (click)="choosePoll(poll.$key)">
+          {{i+1}}: {{poll.title}}</button>
+        <button md-icon-button color="warn" (click)="delete(poll.$key)">
+          <md-icon md-list-icon>clear</md-icon>
+        </button>
+      </md-list-item>
+  </md-list>
+  </md-menu>
+  <!-- </md-grid-tile> -->
+</span>
+<!-- </md-toolbar> -->
+
+  <md-card class="chart-card" *ngIf="currentPoll">
+    <md-card-title>
+      {{currentPoll.title}}
+    </md-card-title>
+  <!-- <md-grid-tile [colspan]="3"> -->
     <!-- <md-list>
       <md-list-item [colspan]=3> -->
+<md-card-content>
         <google-chart [data]="lineChartOptions" (chartReady)='ready($event)'></google-chart>
+</md-card-content>
+<md-card-footer>
+Client: {{currentPoll.clientName}}
+</md-card-footer>
       <!-- </md-list-item>
     </md-list> -->
-  </md-grid-tile>
-<md-grid-tile colspan="1">
-<md-list>
-  <md-list-item>
-    <h3>List of Polls</h3>
-  </md-list-item>
-  <md-list-item *ngFor="let poll of polls | async;  let i = index">
-      <button md-button style="width:100%; text-align:left;" (click)="choosePoll(poll.$key)">
-        {{i+1}}: {{poll.title}} | {{poll.$key}}</button>
-      <button md-icon-button color="warn" (click)="delete(poll.$key)">
-        <md-icon md-list-icon>clear</md-icon>
-      </button>
-    </md-list-item>
-</md-list>
-</md-grid-tile>
+  <!-- </md-grid-tile> -->
+  </md-card>
+
+<!-- Hides everything between div unless showTesting = true
+  *** TODO: Remove before going live -->
+<div *ngIf="showTesting">
 <md-grid-tile colspan="1">
 
   <form *ngIf="currentPoll" [formGroup]="result">
@@ -83,6 +111,7 @@
 
   </form>
 
+
   <div *ngIf="currentPoll">
     <!-- <div id="chart_div"></div>
     {{lineChartOptions.dataTable | json}}
@@ -90,6 +119,7 @@
 
   </div>
 </md-grid-tile>
+
 <md-grid-tile colspan="1">
 
 
@@ -109,4 +139,5 @@
 
 </md-list>
 </md-grid-tile>
+</div>
 </md-grid-list>
