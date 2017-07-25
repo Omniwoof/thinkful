@@ -108,7 +108,7 @@ export class AuthService {
    this.userSub = this.user.subscribe(
      user => {this.currentUser = user
      console.log(this.currentUser)
-     if (this.currentUser){console.log(this.currentUser.uid)}
+     if (this.currentUser){console.log('CurrentUSerService: ', this.currentUser.uid)}
    },
      err => console.log(err)
    )

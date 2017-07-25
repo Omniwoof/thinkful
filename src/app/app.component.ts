@@ -22,9 +22,15 @@ export class AppComponent {
     public authService: AuthService
   ){
     this.user = afAuth.authState;
-    this.currentUser = authService.getUser();
+    this.currentUser = authService.userSub;
+    // console.log('CurrentUser: ',this.currentUser)
   }
-
+  ngOnInit() {
+    console.log("AppComponent INIT")
+    //TODO FIX THIS
+    console.log('CurrentUser: ', this.authService.afAuth.auth)
+    // this.initClients();
+  }
 // getUser(){
 //   this.userSub = this.user.subscribe(
 //     user => {this.currentUser = user

@@ -16,20 +16,25 @@ var aggregate:string;
 
 @Component({
   selector: 'app-poll',
+  providers: [AuthService],
   templateUrl: './poll.component.html',
   styleUrls: ['./poll.component.css']
 })
 export class PollComponent implements OnInit {
   user: Observable<firebase.User>;
   users: FirebaseListObservable<any[]>;
+  clients: Observable<any[]>;
   polls: FirebaseListObservable<any[]>;
   results: FirebaseListObservable<any[]>;
+  currentClient = new BehaviorSubject(null);
+  currentPolls: Observable<any[]>;
   currentPoll;
   currentResults;
   currentUser;
   result: FormGroup;
   // auth;
   currentTime;
+  clientList;
   data:any;
   emptyData: any;
   // rawData =  [
@@ -67,12 +72,25 @@ export class PollComponent implements OnInit {
     // @Inject('authData') auth
   )
     {
-      this.currentUser = authService.getUser();
+      // this.currentUser = authService.getUser();
       this.user = afAuth.authState;
       // this.auth = auth;
       this.users = db.list('/users');
       this.polls = db.list('/polls');
       this.results = db.list('/results');
+      this.clients = this.user.switchMap(client => {
+        return this.db.list('/users', {
+          query:{
+            orderByChild: 'counsellor',
+            equalTo: client.uid
+          }
+        })
+      })
+
+      this.clientList = this.clients.subscribe(client => {
+        this.clientList = client
+        console.log('ClientSub: ', this.clientList)
+      })
      }
 
     public ready(event: ChartReadyEvent) {
@@ -83,17 +101,28 @@ export class PollComponent implements OnInit {
     //   console.log('AuthState: '+ authState);
     //   console.log(authState);
     // })
-
     // this.auth = this.user
 
     // this.getUsers()
     // this.initPolls()
     // this.initResults()
-    console.log("Chart Options: ", this.lineChartOptions)
+    console.log("Clients list ", this.clients)
     // this.initChart()
 
     // this.drawChart()
     // this.altChart()
+  }
+  changeClient(client){
+    this.currentClient.next(client)
+    console.log('Current Client Updated! Client.$key: ', client.$key)
+    this.currentPolls =
+      this.db.list('/polls', {
+        query: {
+          orderByChild: 'clientID',
+          equalTo: client.$key
+        }
+      })
+
   }
   delete(key) {
     this.polls.remove(key)
@@ -459,7 +488,7 @@ export class PollComponent implements OnInit {
   // initRangeChangeDetection(){
   //   google.visualization.events.addListener(this.lineChartOptions, 'rangechange', this.rangechange_handler);
   // }
-  rangechange_handler(e){
-    console.log('Range changed to ', e['start'], ' and ', e['end']);
-  }
+  // rangechange_handler(e){
+  //   console.log('Range changed to ', e['start'], ' and ', e['end']);
+  // }
 }

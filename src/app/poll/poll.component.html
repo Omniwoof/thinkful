@@ -8,19 +8,23 @@
 <br>
 </div>
 
-<md-grid-list cols="3">
+<md-grid-list cols="4">
   <!-- <md-toolbar> -->
     <span>
-  <!-- <md-grid-tile colspan="1"> -->
+
     <!-- <md-list-item> -->
 
     <!-- </md-list-item> -->
     <button md-icon-button><a href="#"><md-icon>home</md-icon></a></button>
     <button md-icon-button><a href="/newquestion"><md-icon>add_circle</md-icon></a></button>
-    <button md-icon-button [mdMenuTriggerFor]="pollList">List Questions
-    <md-icon>more_vert</md-icon>
+    <button md-icon-button [mdMenuTriggerFor]="pollList">Charts
+    <md-icon>insert_chart</md-icon>
   </button>
+  <md-grid-tile colspan="2">
+
+  <!-- <button style="padding-left: 40px" md-icon-button [mdMenuTriggerFor]="clientList">Clients<md-icon>person</md-icon></button> -->
   <md-menu #pollList="mdMenu">
+
   <md-list>
 
     <md-list-item *ngFor="let poll of polls | async;  let i = index">
@@ -30,11 +34,45 @@
           <md-icon md-list-icon>clear</md-icon>
         </button>
       </md-list-item>
-  </md-list>
+    </md-list>
+
   </md-menu>
-  <!-- </md-grid-tile> -->
+  <!-- <md-menu #clientList="mdMenu">
+    <md-list>
+      <md-list-item *ngFor="let client of clients | async;  let i = index">
+        <button md-button style="width:100%; text-align:left;" (click)="choosePoll(poll.$key)">
+          {{i+1}}: {{client.username}}</button>
+        <button md-icon-button color="warn" (click)="delete(poll.$key)">
+          <md-icon md-list-icon>clear</md-icon>
+        </button>
+      </md-list-item>
+    </md-list>
+  </md-menu> -->
+  </md-grid-tile>
 </span>
 <!-- </md-toolbar> -->
+<md-grid-tile colspan="1">
+<div>
+  Current Client: {{ (currentClient | async)?.username }}
+<md-list>
+  <md-list-item *ngFor="let poll of currentPolls | async;  let i = index" (click)="choosePoll(poll.$key)">
+    {{i+1}}: {{poll.title}}
+  </md-list-item>
+</md-list>
+</div>
+</md-grid-tile>
+<md-grid-tile colspan="1">
+  <md-list>
+    <md-list-item *ngFor="let client of clients | async;  let i = index">
+      <md-card (click)="changeClient(client)">
+        <md-card-header>
+          {{i+1}}: {{client.username}}
+        </md-card-header>
+      </md-card>
+    </md-list-item>
+  </md-list>
+</md-grid-tile>
+
 
   <md-card class="chart-card" *ngIf="currentPoll">
     <md-card-title>
@@ -141,3 +179,6 @@ Client: {{currentPoll.clientName}}
 </md-grid-tile>
 </div>
 </md-grid-list>
+<div *ngFor="let client of clients | async;  let i = index">
+{{i}}  Client: {{client.username}} | {{client.clientID}}
+</div>
