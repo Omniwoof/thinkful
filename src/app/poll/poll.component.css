@@ -2,3 +2,23 @@
   width: 800px;
   height: 320px;
 }
+
+.right-sidebar {
+  width:200px;
+  float: right;
+}
+md-card{
+  width:200px;
+  /*height: 80px;*/
+  padding-left: 10px;
+}
+.clientlist {
+  margin: 60px;
+  height: 10px;
+}
+.pending{
+  color: red;
+}
+body{
+  height: 100px;
+}

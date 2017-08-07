@@ -6,24 +6,32 @@
   Add Poll: <input type="text" #newPollOwned placeholder="Title" value="pollOwned"/><br>
   <button (click)="addUserData(newClient.value, newPollOwned.value)">Update User Data</button>
 <br>
+
 </div>
 
-<md-grid-list cols="4">
+<md-grid-list cols="5">
   <!-- <md-toolbar> -->
     <span>
 
     <!-- <md-list-item> -->
 
     <!-- </md-list-item> -->
-    <button md-icon-button><a href="#"><md-icon>home</md-icon></a></button>
-    <button md-icon-button><a href="/newquestion"><md-icon>add_circle</md-icon></a></button>
-    <button md-icon-button [mdMenuTriggerFor]="pollList">Charts
-    <md-icon>insert_chart</md-icon>
-  </button>
-  <md-grid-tile colspan="2">
+    <button md-icon-button (click)="showPolls = false; showChart = false"><a href="#"><md-icon>home</md-icon></a></button>
+    <button md-icon-button></button>
+    <button md-icon-button (click)="showAddClient=true"><md-icon>person_add</md-icon></button>
+    <div *ngIf="showAddClient">
+      <app-send-invite></app-send-invite>
+      <button (click)="showAddClient=false"><md-icon> close </md-icon></button>
+    </div>
+    <div *ngIf="showNewQuestion"><button (click)="showNewQuestion=false">X</button><app-new-poll [currentClient]="this.currentClient"></app-new-poll></div>
+    <!-- <button (click)="toggle()">Toggle PopOver</button> -->
+    <!-- <button md-icon-button [mdMenuTriggerFor]="pollList">Charts -->
+    <!-- <md-icon>insert_chart</md-icon>
+  </button> -->
+  <!-- <md-grid-tile colspan="2"> -->
 
   <!-- <button style="padding-left: 40px" md-icon-button [mdMenuTriggerFor]="clientList">Clients<md-icon>person</md-icon></button> -->
-  <md-menu #pollList="mdMenu">
+  <!-- <md-menu #pollList="mdMenu">
 
   <md-list>
 
@@ -36,7 +44,7 @@
       </md-list-item>
     </md-list>
 
-  </md-menu>
+  </md-menu> -->
   <!-- <md-menu #clientList="mdMenu">
     <md-list>
       <md-list-item *ngFor="let client of clients | async;  let i = index">
@@ -48,49 +56,76 @@
       </md-list-item>
     </md-list>
   </md-menu> -->
-  </md-grid-tile>
+  <!-- </md-grid-tile> -->
 </span>
 <!-- </md-toolbar> -->
-<md-grid-tile colspan="1">
-<div>
-  Current Client: {{ (currentClient | async)?.username }}
-<md-list>
-  <md-list-item *ngFor="let poll of currentPolls | async;  let i = index" (click)="choosePoll(poll.$key)">
-    {{i+1}}: {{poll.title}}
-  </md-list-item>
-</md-list>
-</div>
-</md-grid-tile>
-<md-grid-tile colspan="1">
-  <md-list>
-    <md-list-item *ngFor="let client of clients | async;  let i = index">
-      <md-card (click)="changeClient(client)">
-        <md-card-header>
-          {{i+1}}: {{client.username}}
-        </md-card-header>
-      </md-card>
-    </md-list-item>
-  </md-list>
-</md-grid-tile>
-
-
+<md-grid-tile colspan="3" >
+<div [@chartState]="stateName">
+<div *ngIf="showPolls">
   <md-card class="chart-card" *ngIf="currentPoll">
     <md-card-title>
-      {{currentPoll.title}}
+      <button (click)="toggle()"><md-icon> close </md-icon></button> {{currentPoll.title}}
     </md-card-title>
-  <!-- <md-grid-tile [colspan]="3"> -->
-    <!-- <md-list>
-      <md-list-item [colspan]=3> -->
 <md-card-content>
         <google-chart [data]="lineChartOptions" (chartReady)='ready($event)'></google-chart>
 </md-card-content>
 <md-card-footer>
 Client: {{currentPoll.clientName}}
 </md-card-footer>
-      <!-- </md-list-item>
-    </md-list> -->
-  <!-- </md-grid-tile> -->
   </md-card>
+</div>
+</div>
+</md-grid-tile>
+<md-grid-tile colspan="1">
+  <div *ngIf="(currentPolls | async)?.length > 0 && showPolls">
+<!-- <div   *ngIf="(currentClient | async)?.username"> -->
+  <button (click)="showPolls = false"><md-icon> close </md-icon></button>Current Client: {{ (currentClient | async)?.username }}
+<md-list>
+  <div [@listAnimation]="(currentPolls | async)?.length">
+  <md-list-item class='clientlist' *ngFor="let poll of currentPolls | async;  let i = index" (click)="choosePoll(poll.$key)">
+    <md-card> {{i+1}}: {{poll.title}}</md-card>
+
+  </md-list-item>
+</div>
+</md-list>
+<!-- </div> -->
+</div>
+</md-grid-tile>
+<md-grid-tile colspan="1" >
+  <!-- <md-list>
+    <md-list-item class='clientlist'*ngFor="let client of clients | async;  let i = index">
+      <md-card (click)="changeClient(client)">
+        <md-card-title>
+          {{i+1}}: {{client.clientNickName}} {{client.clientRef}}
+        </md-card-title>
+        <md-card-subtitle>
+          <p *ngIf="!client.clientID">Invite Pending</p>
+        </md-card-subtitle>
+        <md-card-actions>
+          <button md-button (click)="showNewQuestion = true" *ngIf="client.$key == (currentClient | async)?.$key"><md-icon>add_circle</md-icon></button>
+        </md-card-actions>
+      </md-card>
+    </md-list-item>
+  </md-list> -->
+  <md-list>
+    <md-list-item *ngFor="let client of clients | async;  let i = index" (click)="changeClient(client)">
+      <!-- <div > -->
+        <h3 md-line>
+          {{i+1}}: {{client.clientNickName}} {{client.clientRef}}
+        </h3>
+        <!-- <md-card-subtitle> -->
+          <p md-line class='pending' *ngIf="!client.clientID">Invite Pending</p>
+        <!-- </md-card-subtitle> -->
+        <!-- <md-card-actions> -->
+          <button md-button md-line (click)="showNewQuestion = true" *ngIf="client.$key == (currentClient | async)?.$key">Add Question <md-icon>add_circle</md-icon></button>
+        <!-- </md-card-actions> -->
+      <!-- </div> -->
+    </md-list-item>
+  </md-list>
+
+</md-grid-tile>
+
+
 
 <!-- Hides everything between div unless showTesting = true
   *** TODO: Remove before going live -->
@@ -179,6 +214,7 @@ Client: {{currentPoll.clientName}}
 </md-grid-tile>
 </div>
 </md-grid-list>
-<div *ngFor="let client of clients | async;  let i = index">
+
+<!-- <div *ngFor="let client of clients | async;  let i = index">
 {{i}}  Client: {{client.username}} | {{client.clientID}}
-</div>
+</div> -->

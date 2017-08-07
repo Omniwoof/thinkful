@@ -28,11 +28,11 @@
         </md-input-container>
         <br><br>
         <!-- <label> -->
-          <md-select formControlName="clientID" placeholder="Choose Client" (change)="updateClient($event.value)">
+          <!-- <md-select formControlName="clientID" placeholder="Choose Client" (change)="updateClient($event.value)"> -->
             <!-- updateClient($event.target.value) -->
-            <md-option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}
+            <!-- <md-option *ngFor="let user of users | async" [value]="user.$key">{{user.username}}
             </md-option>
-          </md-select>
+          </md-select> -->
         <!-- </label> -->
         <div class="error" *ngIf="poll.get('clientID').touched && poll.get('clientID').hasError('required')">
           ClientID is required

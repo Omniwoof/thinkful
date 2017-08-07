@@ -1,4 +1,4 @@
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NewPollComponent } from './new-poll/new-poll.component';
 import { MaterialModule } from '@angular/material';
 import { Ng2GoogleChartsModule } from 'ng2-google-charts';
-import * as firebase from 'firebase'
+import * as firebase from 'firebase';
+import { SendInviteComponent } from './send-invite/send-invite.component';
+import { ChartComponent } from './chart/chart.component';
+import { QuestionsComponent } from './questions/questions.component';
 
 // Must export firebase config
 export const firebaseConfig = {
@@ -40,7 +43,11 @@ const appRoutes: Routes = [
     PollComponent,
     InviteComponent,
     MakepollComponent,
-    NewPollComponent
+    NewPollComponent,
+    SendInviteComponent,
+    //Delete these components and imports, only included because of ng build --prod
+    ChartComponent,
+    QuestionsComponent
   ],
   imports: [
     BrowserAnimationsModule,

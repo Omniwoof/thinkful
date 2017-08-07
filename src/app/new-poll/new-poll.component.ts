@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FirebaseListObservable, AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth'
 import { Poll } from './poll.interface';
-import { Subject } from 'rxjs/Subject';
+// import { Subject } from 'rxjs/Subject';
 import {MdSnackBar} from '@angular/material';
-import { Observable } from 'rxjs/Observable';
+// import { Observable } from 'rxjs/Observable';
+import {Observable, Subject, BehaviorSubject} from "rxjs/Rx";
 
 
 @Component({
@@ -21,7 +22,8 @@ export class NewPollComponent implements OnInit {
   poll: FormGroup
   slide: boolean;
   multichoice: boolean;
-  currentClient: Subject<any>;
+  @Input() currentClient: Subject<any>;
+  // @Input() currentClient = new BehaviorSubject(null);
   iphoneImagePath: string;
 
   constructor(private fb: FormBuilder,
@@ -30,7 +32,7 @@ export class NewPollComponent implements OnInit {
     public db: AngularFireDatabase
   ) {
   this.polls = db.list('/polls');
-  this.currentClient = new Subject();
+  // this.currentClient = new Subject();
   this.users = db.list('/users');
   this.user = afAuth.authState;
   this.clients = db.list('/users', {
@@ -42,7 +44,7 @@ export class NewPollComponent implements OnInit {
  }
 
   ngOnInit() {
-    console.log('Clients: ', this.users)
+    // console.log('Clients: ', this.users)
     this.slide = false;
     // this.initUsers();
     this.iphoneImagePath = 'assets/images/iphone.png'
@@ -65,6 +67,13 @@ export class NewPollComponent implements OnInit {
       ])
     })
 });
+this.currentClient.subscribe(client => {
+  console.log('Current Client (NEW QUESTION): ', client)
+  this.poll.patchValue({
+    clientID: client.clientID,
+    clientName: client.clientName
+  })
+})
     // this.users.subscribe(client => {
     //   console.log(client)
     // });

@@ -1,0 +1,26 @@
+<form [formGroup]="invite">
+  <md-input-container>
+    <input mdInput type="text" placeholder="Client Email" formControlName="email">
+  <div class="error" *ngIf="invite.get('email').touched && invite.get('email').hasError('required')">
+    <i>Email is required.</i>
+  </div>
+</md-input-container><br>
+  <md-input-container>
+  <input mdInput type="text" placeholder="Client Nickname" formControlName="clientNickName">
+<div class="error" *ngIf="invite.get('clientNickName').touched && invite.get('clientNickName').hasError('required')">
+  <i>For security and ethical reasons a pseudonym for your client is required. Clients initials or first name are commonly used.</i>
+</div>
+</md-input-container><br>
+  <md-input-container>
+<input mdInput type="text" placeholder="Client Reference" formControlName="clientRef">
+
+  <!-- <div class="error" *ngIf="invite.get('email').touched && invite.get('email').hasError('pattern')">
+    Not valid email address
+  </div> -->
+  </md-input-container>
+  <div><i>For security and ethical reasons DO NOT use reference numbers from other sources, like Medicare, GP reference etc. Internal reference numbers only.</i></div>
+  <button md-icon-button color="primary" [disabled]="invite.invalid" (click)="onSubmit(invite)"><md-icon>done</md-icon></button>
+  <button md-icon-button color="warn" (click)="clearInvite()"><md-icon>delete</md-icon></button>
+</form>
+<p>Form value: {{ invite.value | json }}</p>
+<p>Form status: {{ invite.status | json }}</p>

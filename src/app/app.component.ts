@@ -22,13 +22,13 @@ export class AppComponent {
     public authService: AuthService
   ){
     this.user = afAuth.authState;
-    this.currentUser = authService.userSub;
+    // this.currentUser = authService.userSub;
     // console.log('CurrentUser: ',this.currentUser)
   }
   ngOnInit() {
     console.log("AppComponent INIT")
     //TODO FIX THIS
-    console.log('CurrentUser: ', this.authService.afAuth.auth)
+    // console.log('CurrentUser: ', this.authService.afAuth.auth)
     // this.initClients();
   }
 // getUser(){
@@ -41,12 +41,13 @@ export class AppComponent {
 //   )
 // }
 //
-// login() {
-//   this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-// }
+login() {
+  this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+}
 //
-// logout() {
-//   this.userSub.unsubscribe();
-//   this.afAuth.auth.signOut();
-// }
+logout() {
+  // this.userSub.unsubscribe();
+  this.afAuth.auth.signOut();
+  // this.user.signOut()
+}
 }

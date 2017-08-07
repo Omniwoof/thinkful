@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import * as firebase from 'firebase';
 import { ChartReadyEvent } from 'ng2-google-charts';
 import { Router } from '@angular/router';
+import { trigger, state, style, animate, transition, query, stagger } from '@angular/animations';
 declare var google:any;
 declare var wrapper:any;
 var aggregate:string;
@@ -18,7 +19,40 @@ var aggregate:string;
   selector: 'app-poll',
   providers: [AuthService],
   templateUrl: './poll.component.html',
-  styleUrls: ['./poll.component.css']
+  styleUrls: ['./poll.component.css'],
+  // animations: [
+  //   trigger('popOverState', [
+  //     state('show', style({
+  //       opacity: 1
+  //     })),
+  //     state('hide',   style({
+  //       opacity: 0
+  //     })),
+  //     transition('show => hide', animate('600ms ease-out')),
+  //     transition('hide => show', animate('1000ms ease-in'))
+  //   ])
+  // ]
+  animations: [
+      trigger('listAnimation', [
+        transition('* => *', [
+          query('md-card', style({ transform: 'translate3d(0,-20px,-20px)', opacity: 0}),{ optional: true }),
+          query('md-card',
+            stagger('100ms', [
+              animate('100ms', style({ transform: 'translate3d(0,0,0)', opacity: 1}))
+          ]),{ optional: true })
+        ])
+      ]),
+      trigger('chartState', [
+            state('true', style({
+              opacity: 1
+            })),
+            state('false',   style({
+              opacity: 0
+            })),
+            transition('true => false', animate('200ms')),
+            transition('false => true', animate('600ms'))
+          ])
+      ]
 })
 export class PollComponent implements OnInit {
   user: Observable<firebase.User>;
@@ -27,6 +61,13 @@ export class PollComponent implements OnInit {
   polls: FirebaseListObservable<any[]>;
   results: FirebaseListObservable<any[]>;
   currentClient = new BehaviorSubject(null);
+  showPolls: boolean = false;
+  showChart: boolean = false;
+  showAddButton: boolean = false;
+  showAddClient: boolean = false;
+  showTesting: boolean = false;
+  showNewQuestion: boolean = false;
+  chartReady: boolean = false;
   currentPolls: Observable<any[]>;
   currentPoll;
   currentResults;
@@ -78,22 +119,25 @@ export class PollComponent implements OnInit {
       this.users = db.list('/users');
       this.polls = db.list('/polls');
       this.results = db.list('/results');
-      this.clients = this.user.switchMap(client => {
-        return this.db.list('/users', {
+      this.clients = this.user.switchMap(user => {
+        return this.db.list('/clients', {
           query:{
-            orderByChild: 'counsellor',
-            equalTo: client.uid
+            orderByChild: 'counsellorID',
+            equalTo: user.uid
           }
         })
       })
 
       this.clientList = this.clients.subscribe(client => {
         this.clientList = client
-        console.log('ClientSub: ', this.clientList)
+        console.log(this.clientList)
+        // console.log('ClientSub: ', this.clientList)
       })
      }
 
     public ready(event: ChartReadyEvent) {
+      this.chartReady = true;
+      // console.log("Chart Ready! this.chartReady = ", this.chartReady)
     }
   ngOnInit() {
     //subscribe to userdata from auth.service
@@ -106,24 +150,38 @@ export class PollComponent implements OnInit {
     // this.getUsers()
     // this.initPolls()
     // this.initResults()
-    console.log("Clients list ", this.clients)
+    // console.log("Clients list ", this.clients)
     // this.initChart()
 
     // this.drawChart()
     // this.altChart()
   }
+  // changeChart(chart){
+  //   this.showChart.next(chart)
+  //   console.log("Show Chart? ", this.showChart)
+  // }
+
   changeClient(client){
     this.currentClient.next(client)
-    console.log('Current Client Updated! Client.$key: ', client.$key)
+    console.log('Current Client Updated! Client.$key: ', client.clientID)
+    // console.log('Current Client (Polls): ', this.currentClient.$key)
+    this.showPolls = true
     this.currentPolls =
       this.db.list('/polls', {
         query: {
           orderByChild: 'clientID',
-          equalTo: client.$key
+          equalTo: client.clientID
         }
       })
-
+      console.log('CurrentPolls: ', this.currentPolls);
+      this.currentPolls.subscribe(p=>console.log(p))
   }
+  get stateName() {
+   return this.showChart ? 'true' : 'false'
+ }
+ toggle() {
+   this.showChart = !this.showChart;
+ }
   delete(key) {
     this.polls.remove(key)
   }
@@ -150,11 +208,12 @@ export class PollComponent implements OnInit {
     //this.initChart()
     // Generates Server Based Date/Time Stamp
     this.generateDateTime();
-    console.log('KEY: ', key)
+    // console.log('KEY: ', key)
     this.db.object('/polls/' + key).subscribe(poll => {
       this.currentPoll = poll;
-      console.log('CURRENT POLL: ', this.currentPoll);
-      console.log('CURRENT POLL KEY: ', this.currentPoll.$key);
+      // console.log('CURRENT POLL: ', this.currentPoll);
+      // console.log('CURRENT POLL KEY: ', this.currentPoll.$key);
+      // console.log('GENDATA: ', this.genData().dataTable)
     })
     this.currentResults = this.db.list('/results/', {
       query: {
@@ -162,12 +221,12 @@ export class PollComponent implements OnInit {
         equalTo: this.currentPoll.$key
       }
     })
-    console.log('CURRENT RESULTS: ', this.currentResults)
+    // console.log('CURRENT RESULTS: ', this.currentResults)
     // this.lineChartOptions.options.title = this.result.value.title
-    console.log('CHART TITLE: ', this.lineChartOptions.options.title)
+    // console.log('CHART TITLE: ', this.lineChartOptions.options.title)
     this.currentResults.subscribe(data => {
       this.data=[]
-      console.log('DATA SUB: ', data)
+      // console.log('DATA SUB: ', data)
       //If slider or multi, map data differently
       //TODO: Add test if there is no data
       if (data[0].sliders != null && data[0].multi.choices != null){
@@ -221,13 +280,13 @@ export class PollComponent implements OnInit {
         //       this.multiData()
         // console.log('GENMULTI')
       }else {this.data = data.map(value => [new Date(value.created), 1])
-            console.log('DATA MAP: ', this.data)
+            // console.log('DATA MAP: ', this.data)
             this.genData()
           }
 
           // initRangeChangeDetection()
     })
-    console.log('DATATABLE: ', this.data)
+    // console.log('DATATABLE: ', this.data)
     this.result = this.fb.group({
     pollID: [this.currentPoll.$key, ],
     title: [this.currentPoll.title, [Validators.required, Validators.minLength(2)]],
@@ -249,11 +308,11 @@ export class PollComponent implements OnInit {
     })
 
     });
-    console.log('Current Result: ', this.result);
+    // console.log('Current Result: ', this.result);
     if(this.currentPoll.sliders){
-      console.log("Slider detected");
+      // console.log("Slider detected");
       for (var i=0; i < this.currentPoll.sliders.slider.length; i++){
-        console.log('Test', i)
+        // console.log('Test', i)
         //console.log(this.currentPoll.sliders.slider[i])
         this.initSlider(-1);
         this.addSlider(i);
@@ -265,6 +324,8 @@ export class PollComponent implements OnInit {
         this.addChoice(i);
       }
     }
+    this.showChart = true
+    this.showAddButton = true
   }
   initChoice(i){
     return this.fb.group({
@@ -280,7 +341,7 @@ export class PollComponent implements OnInit {
     control.push(this.initChoice(i));
   }
   initSlider(i){
-    console.log('Init Slider')
+    // console.log('Init Slider')
     if (i < 0){
       return this.fb.group({
         slideName: ['', ],
@@ -300,29 +361,29 @@ export class PollComponent implements OnInit {
     }
   }
   addSlider(i){
-    console.log('Slider Added')
-    console.log('RESULT: ', this.result)
+    // console.log('Slider Added')
+    // console.log('RESULT: ', this.result)
       const control = this.result.controls['sliders']['controls']['slider'];
-     console.log('CONTROL: ', control)
+    //  console.log('CONTROL: ', control)
     control.push(this.initSlider(i));
   }
   addResult(value){
     //submit form and new /results
-    console.log(value);
+    // console.log(value);
     this.results.push(value._value);
   }
   viewResult(value){
-    console.log(value.value)
+    // console.log(value.value)
   }
   generateDateTime(){
     var newTime = new Date();
     // this.currentTime = newTime
     this.currentTime = firebase.database.ServerValue.TIMESTAMP;
-    console.log('Time: ', this.currentTime)
+    // console.log('Time: ', this.currentTime)
   }
   floorDate(datetime) {
-    console.log('Aggregate =', aggregate)
-    console.log('FloorDate datetime: ', datetime)
+    // console.log('Aggregate =', aggregate)
+    // console.log('FloorDate datetime: ', datetime)
     var newDate = new Date(datetime);
     if (aggregate = 'daily'){
     newDate.setHours(0);
@@ -333,10 +394,11 @@ export class PollComponent implements OnInit {
     return newDate;
   }
   genData(){
+    // if (this.chartReady == true){
       let dataTable = new google.visualization.DataTable();
             dataTable.addColumn('date', 'Time');
             dataTable.addColumn('number', 'Count');
-            console.log('DATA ARRAY', this.data)
+            // console.log('DATA ARRAY', this.data)
             dataTable.addRows(this.data);
               // function floorDate(datetime) {
               //   var newDate = new Date(datetime);
@@ -357,11 +419,14 @@ export class PollComponent implements OnInit {
                 aggregation: google.visualization.data.sum,
                 type: 'number'
             }]);
-            console.log('DataTable: ', dataTable)
-            console.log('NewDataTable: ', newData)
+            // console.log('DataTable: ', dataTable)
+            // console.log('NewDataTable: ', newData)
             //Re-initalizes the chart
     this.lineChartOptions = Object.create(this.lineChartOptions);
     this.lineChartOptions.dataTable = newData
+  // } else {console.log("waiting for data");
+  //  setTimeout(this.genData(), 100);
+  //  return}
   }
   sliderData(){
     let dataTable = new google.visualization.DataTable();
@@ -387,7 +452,7 @@ export class PollComponent implements OnInit {
     var yData = []
           dataTable.addColumn('date', 'Time');
           this.result.value.multi.choices.forEach((element, index) => {
-            console.log('ForEach Choice #'+index+":", element.choice.choice)
+            // console.log('ForEach Choice #'+index+":", element.choice.choice)
             dataTable.addColumn('number', element.choice.choice)
             yData.push({column: index+1,
               label: element.choice.choice,
@@ -429,25 +494,25 @@ export class PollComponent implements OnInit {
           //     aggregation: google.visualization.data.sum,
           //     type: 'number'
           // }]
-          console.log('yData: ', yData)
+          // console.log('yData: ', yData)
           var newData = google.visualization.data.group(dataTable, [{
             column: 0,
             modifier: this.floorDate,
             type: 'date'
         }], yData
       );
-          console.log('NEWDATA: ', newData )
+          // console.log('NEWDATA: ', newData )
           this.lineChartOptions = Object.create(this.lineChartOptions);
           this.lineChartOptions.dataTable = newData
   }
   combinedData(){
-    console.log('combinedData: ', this.data)
+    // console.log('combinedData: ', this.data)
     let dataTable = new google.visualization.DataTable();
-    console.log('this.result.value.sliders.slider.length: ',this.result.value.sliders.slider.length)
+    // console.log('this.result.value.sliders.slider.length: ',this.result.value.sliders.slider.length)
     var yData = []
           dataTable.addColumn('date', 'Time');
           this.result.value.sliders.slider.forEach((element, index) => {
-            console.log('ForEach Slider #'+index+":", element.slideName)
+            // console.log('ForEach Slider #'+index+":", element.slideName)
             dataTable.addColumn('number', element.slideName)
             yData.push({
               column: index+1,
@@ -457,14 +522,14 @@ export class PollComponent implements OnInit {
             })
           })
           this.result.value.multi.choices.forEach((element, index) => {
-            console.log('ForEach Choice #'+index+this.result.value.sliders.slider.length+":", element.choice.choice)
+            // console.log('ForEach Choice #'+index+this.result.value.sliders.slider.length+":", element.choice.choice)
             dataTable.addColumn('number', element.choice.choice)
             yData.push({column: index+1+this.result.value.sliders.slider.length,
               label: element.choice.choice,
               aggregation: google.visualization.data.sum,
               type: 'number'})
           })
-          console.log('yData: ', yData)
+          // console.log('yData: ', yData)
           dataTable.addRows(this.data);
           // function floorDate(datetime) {
           //   var newDate = new Date(datetime);
@@ -480,7 +545,7 @@ export class PollComponent implements OnInit {
             type: 'date'
         }], yData
       );
-          console.log('NEWDATA: ', newData )
+          // console.log('NEWDATA: ', newData )
           this.lineChartOptions = Object.create(this.lineChartOptions);
           this.lineChartOptions.dataTable = newData
           // google.visualization.events.addListener(wrapper, 'rangechange', this.rangechange_handler);

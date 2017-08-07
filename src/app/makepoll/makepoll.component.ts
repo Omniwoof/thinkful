@@ -3,33 +3,38 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { Poll } from './poll-model'
+import {Observable, Subject, BehaviorSubject} from "rxjs/Rx";
 @Component({
   selector: 'app-makepoll',
   templateUrl: './makepoll.component.html',
   styleUrls: ['./makepoll.component.css'],
 })
 export class MakepollComponent implements OnInit {
+  user: Observable<firebase.User>;
   users: FirebaseListObservable<any[]>;
   polls: FirebaseListObservable<any[]>;
-  slider;
-  yn;
-  multi;
+  public slider:boolean = false;
+  public yn:boolean = false;
+  public multi:boolean = false;
   currentUser;
-  pollForm: FormGroup;
-  ynForm: FormGroup;
-  multiForm: FormGroup;
-  sliderForm: FormGroup;
+  public pollForm: FormGroup;
+  public ynForm: FormGroup;
+  public multiForm: FormGroup;
+  public sliderForm: FormGroup;
 
   constructor(private fb: FormBuilder,
     public afAuth: AngularFireAuth,
     public db: AngularFireDatabase
-  ) { this.users = db.list('/users');}
+  ) { this.users = db.list('/users');
+      this.currentUser = afAuth.authState;
+      // this.currentUser = user.subscribe({user => return user.uid});
+      }
 
   ngOnInit() {
     // this.getUsers()
     this.pollForm = this.fb.group({
       title: '',
-      clientID: this.currentUser,
+      clientID: this.currentUser.uid,
       buttonLabel: '',
       sliderForm: this.fb.group({
         maxSlider: '',
